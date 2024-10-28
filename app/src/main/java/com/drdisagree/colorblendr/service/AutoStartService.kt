@@ -43,7 +43,10 @@ class AutoStartService : Service() {
 
     private var notificationManager: NotificationManager? = null
     private val onColorsChangedListener = { colors: WallpaperColors?, which: Int ->
-        val intent = Intent(this, BroadcastListener::class.java)
+        val intent = Intent(
+            this,
+            BroadcastListener::class.java
+        )
         intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
         sendBroadcast(intent)
     }
