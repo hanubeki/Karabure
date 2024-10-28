@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.app.WallpaperManager.OnColorsChangedListener
 import android.content.Context
@@ -42,6 +43,11 @@ import java.util.TimerTask
 class AutoStartService : Service() {
 
     private var notificationManager: NotificationManager? = null
+    private val onColorsChangedListener = { colors: WallpaperColors?, which: Int ->
+        val intent = Intent(this, BroadcastListener::class.java)
+        intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
+        sendBroadcast(intent)
+    }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -63,16 +69,10 @@ class AutoStartService : Service() {
         }
 
         val wallpaperManager = WallpaperManager.getInstance(this)
-
-        if (wallpaperManager != null) {
-            val onColorsChangedListener = OnColorsChangedListener { colors, which ->
-                val intent = Intent(this, BroadcastListener::class.java)
-                intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
-                sendBroadcast(intent)
-            }
-
-            wallpaperManager.addOnColorsChangedListener(onColorsChangedListener, Handler(Looper.getMainLooper()))
-        }
+        wallpaperManager?.addOnColorsChangedListener(
+            onColorsChangedListener,
+            Handler(Looper.getMainLooper())
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -110,6 +110,9 @@ class AutoStartService : Service() {
             // Testing purposes only
             stopTimer()
         }
+
+        val wallpaperManager = WallpaperManager.getInstance(this)
+        wallpaperManager?.removeOnColorsChangedListener(onColorsChangedListener)
     }
 
     private fun registerSystemServices() {
