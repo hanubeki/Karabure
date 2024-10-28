@@ -1,5 +1,7 @@
 package com.drdisagree.colorblendr.service
 
+import android.app.WallpaperColors
+import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -55,7 +57,7 @@ class BroadcastListener : BroadcastReceiver() {
 
                 // TODO: better way to observe wallpaper colors changes
                 Intent.ACTION_WALLPAPER_CHANGED,
-                Intent.ACTION_SCREEN_OFF -> {
+                "com.drdisagree.colorblendr.intent.REFRESH" -> {
                     handleWallpaperChanged(context)
                 }
 
@@ -83,7 +85,7 @@ class BroadcastListener : BroadcastReceiver() {
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
                     Intent.ACTION_WALLPAPER_CHANGED,
-                    Intent.ACTION_SCREEN_OFF
+                    "com.drdisagree.colorblendr.intent.REFRESH"
                 )
             ) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent)

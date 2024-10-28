@@ -1,9 +1,12 @@
 package com.drdisagree.colorblendr.service
 
+import android.os.Handler
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.WallpaperManager
+import android.app.WallpaperManager.OnColorsChangedListener
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -43,6 +46,7 @@ class AutoStartService : Service() {
         return null
     }
 
+    @Suppress("deprecation")
     override fun onCreate() {
         super.onCreate()
 
@@ -56,6 +60,18 @@ class AutoStartService : Service() {
             BroadcastListener.lastOrientation = getScreenRotation(
                 this
             )
+        }
+
+        val wallpaperManager = WallpaperManager.getInstance(this)
+
+        if (wallpaperManager != null) {
+            val onColorsChangedListener = OnColorsChangedListener { colors, which ->
+                val intent = Intent(this, BroadcastListener::class.java)
+                intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
+                sendBroadcast(intent)
+            }
+
+            wallpaperManager.addOnColorsChangedListener(onColorsChangedListener, Handler())
         }
     }
 
