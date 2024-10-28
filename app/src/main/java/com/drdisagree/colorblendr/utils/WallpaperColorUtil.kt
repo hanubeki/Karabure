@@ -53,7 +53,7 @@ object WallpaperColorUtil {
             val wallpaperColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
 
             if (wallpaperColors != null) {
-                val ret: ArrayList<Int> = arrayListOf<Int>()
+                val ret: ArrayList<Int> = arrayListOf()
 
                 val primary = wallpaperColors.primaryColor
                 ret.add(primary.toArgb())

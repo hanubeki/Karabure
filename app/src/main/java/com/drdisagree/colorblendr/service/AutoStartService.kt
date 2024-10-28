@@ -42,7 +42,7 @@ import java.util.TimerTask
 class AutoStartService : Service() {
 
     private var notificationManager: NotificationManager? = null
-    private val onColorsChangedListener = { colors: WallpaperColors?, which: Int ->
+    private val onColorsChangedListener = { _: WallpaperColors?, _: Int ->
         val intent = Intent(
             this,
             BroadcastListener::class.java
