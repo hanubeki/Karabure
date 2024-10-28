@@ -1,6 +1,7 @@
 package com.drdisagree.colorblendr.service
 
 import android.os.Handler
+import android.os.Looper
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -70,7 +71,7 @@ class AutoStartService : Service() {
                 sendBroadcast(intent)
             }
 
-            wallpaperManager.addOnColorsChangedListener(onColorsChangedListener, Handler())
+            wallpaperManager.addOnColorsChangedListener(onColorsChangedListener, Handler(Looper.getMainLooper()))
         }
     }
 
