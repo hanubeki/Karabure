@@ -46,7 +46,6 @@ class AutoStartService : Service() {
         return null
     }
 
-    @Suppress("deprecation")
     override fun onCreate() {
         super.onCreate()
 
