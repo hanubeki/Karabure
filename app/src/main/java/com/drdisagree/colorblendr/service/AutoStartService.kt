@@ -93,6 +93,9 @@ class AutoStartService : Service() {
         isRunning = false
         Log.i(TAG, "onDestroy: Service is destroyed :(")
 
+        val wallpaperManager = WallpaperManager.getInstance(this)
+        wallpaperManager?.removeOnColorsChangedListener(onColorsChangedListener)
+
         try {
             unregisterReceiver(myReceiver)
         } catch (ignored: Exception) {
@@ -109,9 +112,6 @@ class AutoStartService : Service() {
             // Testing purposes only
             stopTimer()
         }
-
-        val wallpaperManager = WallpaperManager.getInstance(this)
-        wallpaperManager?.removeOnColorsChangedListener(onColorsChangedListener)
     }
 
     private fun registerSystemServices() {
