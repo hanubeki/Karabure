@@ -1,10 +1,12 @@
 package com.drdisagree.colorblendr.utils
 
+import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -45,6 +47,31 @@ object WallpaperColorUtil {
     suspend fun getWallpaperColors(context: Context): ArrayList<Int> {
         if (!AppUtil.permissionsGranted(context)) {
             return ColorUtil.monetAccentColors
+        }
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+
+        if (wallpaperManager.wallpaperInfo != null) {
+            val wallpaperColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+
+            if (wallpaperColors != null) {
+                val ret: ArrayList<Int> = arrayListOf<Int>()
+
+                val primary = wallpaperColors.primaryColor
+                ret.add(primary.toArgb())
+
+                val secondary = wallpaperColors.secondaryColor
+                if (secondary != null) {
+                    ret.add(secondary.toArgb())
+                }
+
+                val tertiary = wallpaperColors.tertiaryColor
+                if (tertiary != null) {
+                    ret.add(tertiary.toArgb())
+                }
+
+                return ret
+            }
         }
 
         return try {

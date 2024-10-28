@@ -53,7 +53,9 @@ class BroadcastListener : BroadcastReceiver() {
                     handleBootCompleted(context)
                 }
 
-                Intent.ACTION_WALLPAPER_CHANGED -> {
+                // TODO: better way to observe wallpaper colors changes
+                Intent.ACTION_WALLPAPER_CHANGED,
+                Intent.ACTION_SCREEN_OFF -> {
                     handleWallpaperChanged(context)
                 }
 
@@ -80,6 +82,7 @@ class BroadcastListener : BroadcastReceiver() {
             if (intent.action in listOf(
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
+                    Intent.ACTION_SCREEN_OFF,
                     Intent.ACTION_WALLPAPER_CHANGED
                 )
             ) {
