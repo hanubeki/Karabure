@@ -16,6 +16,7 @@ import com.drdisagree.colorblendr.config.RPrefs
 import com.drdisagree.colorblendr.utils.monet.quantize.QuantizerCelebi
 import com.drdisagree.colorblendr.utils.monet.score.Score
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.math.min
@@ -28,7 +29,7 @@ object WallpaperColorUtil {
     private const val MAX_BITMAP_SIZE = 112
     private const val MAX_WALLPAPER_EXTRACTION_AREA = MAX_BITMAP_SIZE * MAX_BITMAP_SIZE
 
-    suspend fun updateWallpaperColorList(context: Context) {
+    fun updateWallpaperColorList(context: Context) {
         if (AppUtil.permissionsGranted(context)) {
             val wallpaperColors = getWallpaperColors(context)
             RPrefs.putString(Const.WALLPAPER_COLOR_LIST, Const.GSON.toJson(wallpaperColors))
@@ -38,11 +39,11 @@ object WallpaperColorUtil {
         }
     }
 
-    suspend fun getWallpaperColor(context: Context): Int {
+    fun getWallpaperColor(context: Context): Int {
         return getWallpaperColors(context)[0]
     }
 
-    suspend fun getWallpaperColors(context: Context): ArrayList<Int> {
+    fun getWallpaperColors(context: Context): ArrayList<Int> {
         if (!AppUtil.permissionsGranted(context)) {
             return ColorUtil.monetAccentColors
         }
@@ -73,10 +74,12 @@ object WallpaperColorUtil {
         }
 
         return try {
-            val wallpaperBitmap = WallpaperLoader.loadWallpaperAsync(
-                context,
-                WallpaperManager.FLAG_SYSTEM
-            )
+            val wallpaperBitmap = runBlocking {
+                WallpaperLoader.loadWallpaperAsync(
+                    context,
+                    WallpaperManager.FLAG_SYSTEM
+                )
+            }
             wallpaperBitmap?.let {
                 getWallpaperColors(it)
             } ?: ColorUtil.monetAccentColors

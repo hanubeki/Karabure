@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
@@ -108,8 +109,10 @@ class BroadcastListener : BroadcastReceiver() {
 
     private suspend fun handleWallpaperChanged(context: Context) {
         if (permissionsGranted(context)) {
-            val wallpaperColors = withContext(Dispatchers.IO) {
-                getWallpaperColors(context)
+            val wallpaperColors = runBlocking {
+                withContext(Dispatchers.IO) {
+                    getWallpaperColors(context)
+                }
             }
             putString(WALLPAPER_COLOR_LIST, Const.GSON.toJson(wallpaperColors))
 
@@ -182,11 +185,17 @@ class BroadcastListener : BroadcastReceiver() {
                 ) - System.currentTimeMillis()).toDouble()
             ) >= cooldownTime
         ) {
-            putLong(MONET_LAST_UPDATED, System.currentTimeMillis())
+            lastUpdate = System.currentTimeMillis()
 
             CoroutineScope(Dispatchers.Main).launch {
-                delay(500)
-                applyFabricatedColors(context)
+                delay(1000)
+                if (abs(
+                        (lastUpdate - System.currentTimeMillis()).toDouble()
+                    ) >= 1000
+                ) {
+                    applyFabricatedColors(context)
+                    putLong(MONET_LAST_UPDATED, System.currentTimeMillis())
+                }
             }
         }
     }
@@ -194,6 +203,7 @@ class BroadcastListener : BroadcastReceiver() {
     companion object {
         private val TAG: String = BroadcastListener::class.java.simpleName
         var lastOrientation: Int = -1
+        @Volatile private var lastUpdate: Long = 0
         private var cooldownTime: Long = 5000
     }
 }
