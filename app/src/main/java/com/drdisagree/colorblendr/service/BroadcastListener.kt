@@ -1,7 +1,5 @@
 package com.drdisagree.colorblendr.service
 
-import android.app.WallpaperColors
-import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
