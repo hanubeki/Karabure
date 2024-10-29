@@ -185,17 +185,11 @@ class BroadcastListener : BroadcastReceiver() {
                 ) - System.currentTimeMillis()).toDouble()
             ) >= cooldownTime
         ) {
-            lastUpdate = System.currentTimeMillis()
+            putLong(MONET_LAST_UPDATED, System.currentTimeMillis())
 
             CoroutineScope(Dispatchers.Main).launch {
-                delay(1000)
-                if (abs(
-                        (lastUpdate - System.currentTimeMillis()).toDouble()
-                    ) >= 1000
-                ) {
-                    applyFabricatedColors(context)
-                    putLong(MONET_LAST_UPDATED, System.currentTimeMillis())
-                }
+                delay(500)
+                applyFabricatedColors(context)
             }
         }
     }
@@ -203,7 +197,6 @@ class BroadcastListener : BroadcastReceiver() {
     companion object {
         private val TAG: String = BroadcastListener::class.java.simpleName
         var lastOrientation: Int = -1
-        @Volatile private var lastUpdate: Long = 0
         private var cooldownTime: Long = 5000
     }
 }
