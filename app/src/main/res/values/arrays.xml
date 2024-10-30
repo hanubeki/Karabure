@@ -13,17 +13,17 @@
     </string-array>
 
     <string-array name="basic_color_codes" translatable="false">
-        <item>#B05E63</item>
-        <item>#AE623A</item>
-        <item>#9D6C1B</item>
-        <item>#81781E</item>
-        <item>#5C803E</item>
-        <item>#308461</item>
-        <item>#008482</item>
-        <item>#1B809D</item>
-        <item>#4979AF</item>
-        <item>#6E70B3</item>
-        <item>#8D66A7</item>
-        <item>#A4608B</item>
+        <item>#AB6065</item>
+        <item>#AA6541</item>
+        <item>#9A6E27</item>
+        <item>#80782A</item>
+        <item>#5F7F44</item>
+        <item>#3D8363</item>
+        <item>#268381</item>
+        <item>#327F99</item>
+        <item>#5078A8</item>
+        <item>#7071AB</item>
+        <item>#8B69A1</item>
+        <item>#A06288</item>
     </string-array>
 </resources>
