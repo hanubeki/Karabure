@@ -4,13 +4,17 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.WallpaperColors
+import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.media.AudioManager
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
 import android.util.Log
@@ -37,7 +41,16 @@ import java.util.TimerTask
 
 class AutoStartService : Service() {
 
+    private val handler = Handler(Looper.getMainLooper())
     private var notificationManager: NotificationManager? = null
+    private val onColorsChangedListener = { _: WallpaperColors?, _: Int ->
+        val intent = Intent(
+            this,
+            BroadcastListener::class.java
+        )
+        intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
+        sendBroadcast(intent)
+    }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -57,6 +70,8 @@ class AutoStartService : Service() {
                 this
             )
         }
+
+        WallpaperManager.getInstance(this)?.addOnColorsChangedListener(onColorsChangedListener, handler)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -77,6 +92,8 @@ class AutoStartService : Service() {
 
         isRunning = false
         Log.i(TAG, "onDestroy: Service is destroyed :(")
+
+        WallpaperManager.getInstance(this)?.removeOnColorsChangedListener(onColorsChangedListener)
 
         try {
             unregisterReceiver(myReceiver)

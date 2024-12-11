@@ -84,6 +84,13 @@ class BroadcastListener : BroadcastReceiver() {
                     }
                 }
 
+                // TODO: better way to observe wallpaper colors changes
+                "com.drdisagree.colorblendr.intent.REFRESH" -> {
+                    sleepRunnable?.let {
+                        handleWallpaperChanged(context)
+                    }
+                }
+
                 Intent.ACTION_CONFIGURATION_CHANGED -> {
                     if (lastOrientation == currentOrientation) {
                         validateRootAndUpdateColors(context) {
@@ -107,7 +114,8 @@ class BroadcastListener : BroadcastReceiver() {
             if (intent.action in listOf(
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_WALLPAPER_CHANGED
+                    Intent.ACTION_WALLPAPER_CHANGED,
+                    "com.drdisagree.colorblendr.intent.REFRESH"
                 )
             ) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
