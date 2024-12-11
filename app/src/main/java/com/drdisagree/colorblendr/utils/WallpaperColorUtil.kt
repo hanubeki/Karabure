@@ -133,7 +133,7 @@ object WallpaperColorUtil {
 
         val wallpaperColors = ArrayList(
             Score.score(
-                QuantizerCelebi.quantize(pixels, 25)
+                QuantizerCelebi.quantize(pixels, 128)
             )
         )
 
