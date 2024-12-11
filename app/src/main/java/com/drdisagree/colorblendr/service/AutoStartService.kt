@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.media.AudioManager
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -44,11 +45,7 @@ class AutoStartService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var notificationManager: NotificationManager? = null
     private val onColorsChangedListener = { _: WallpaperColors?, _: Int ->
-        val intent = Intent(
-            this,
-            BroadcastListener::class.java
-        )
-        intent.action = "com.drdisagree.colorblendr.intent.REFRESH"
+        val intent = Intent("com.drdisagree.colorblendr.intent.REFRESH")
         sendBroadcast(intent)
     }
 
@@ -193,8 +190,17 @@ class AutoStartService : Service() {
             addDataScheme("package")
         }
 
+        val customIntentFilter = IntentFilter().apply {
+            addAction("com.drdisagree.colorblendr.intent.REFRESH")
+        }
+
         registerReceiver(myReceiver, intentFilterWithoutScheme)
         registerReceiver(myReceiver, intentFilterWithScheme)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(myReceiver, customIntentFilter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(myReceiver, customIntentFilter)
+        }
     }
 
     private fun setupSystemUIRestartListener() {
