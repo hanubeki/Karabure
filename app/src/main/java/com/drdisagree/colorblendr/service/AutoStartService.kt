@@ -1,5 +1,6 @@
 package com.drdisagree.colorblendr.service
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -171,6 +172,7 @@ class AutoStartService : Service() {
     }
 
     @Suppress("DEPRECATION")
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceivers() {
         val intentFilterWithoutScheme = IntentFilter().apply {
             addAction(Intent.ACTION_WALLPAPER_CHANGED)
