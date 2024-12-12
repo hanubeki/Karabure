@@ -27,6 +27,7 @@ import com.drdisagree.colorblendr.ColorBlendr.Companion.appContext
 import com.drdisagree.colorblendr.ColorBlendr.Companion.rootConnection
 import com.drdisagree.colorblendr.R
 import com.drdisagree.colorblendr.common.Const
+import com.drdisagree.colorblendr.common.Const.ACTION_REFRESH
 import com.drdisagree.colorblendr.common.Const.workingMethod
 import com.drdisagree.colorblendr.provider.RootConnectionProvider
 import com.drdisagree.colorblendr.provider.ShizukuConnectionProvider
@@ -46,7 +47,7 @@ class AutoStartService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var notificationManager: NotificationManager? = null
     private val onColorsChangedListener = { _: WallpaperColors?, _: Int ->
-        val intent = Intent("com.drdisagree.colorblendr.intent.REFRESH")
+        val intent = Intent(ACTION_REFRESH)
         sendBroadcast(intent)
     }
 
@@ -193,7 +194,7 @@ class AutoStartService : Service() {
         }
 
         val customIntentFilter = IntentFilter().apply {
-            addAction("com.drdisagree.colorblendr.intent.REFRESH")
+            addAction(ACTION_REFRESH)
         }
 
         registerReceiver(myReceiver, intentFilterWithoutScheme)
