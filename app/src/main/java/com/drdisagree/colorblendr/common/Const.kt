@@ -24,7 +24,7 @@ object Const {
     const val PIXEL_LAUNCHER: String = "com.google.android.apps.nexuslauncher"
 
     // Intent actions
-    const val ACTION_REFRESH = "${BuildConfig.APPLICATION_ID}.intent.REFRESH"
+    const val ACTION_REFRESH: String = "${BuildConfig.APPLICATION_ID}.intent.REFRESH"
 
     // General preferences
     const val FIRST_RUN: String = "firstRun"
