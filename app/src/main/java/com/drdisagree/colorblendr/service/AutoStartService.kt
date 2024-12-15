@@ -172,14 +172,14 @@ class AutoStartService : Service() {
         startForeground(NOTIFICATION_ID, notification)
     }
 
-    @Suppress("DEPRECATION")
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceivers() {
         val intentFilterWithoutScheme = IntentFilter().apply {
+            @Suppress("DEPRECATION")
             addAction(Intent.ACTION_WALLPAPER_CHANGED)
             addAction(Intent.ACTION_CONFIGURATION_CHANGED)
-            addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_MY_PACKAGE_REPLACED)
             addAction(Intent.ACTION_PACKAGE_ADDED)
             addAction(Intent.ACTION_PACKAGE_REMOVED)
