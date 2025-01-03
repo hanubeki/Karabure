@@ -8,6 +8,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.common.Const
+import com.drdisagree.colorblendr.common.Const.ACTION_REFRESH
 import com.drdisagree.colorblendr.common.Const.FABRICATED_OVERLAY_NAME_APPS
 import com.drdisagree.colorblendr.common.Const.MONET_LAST_UPDATED
 import com.drdisagree.colorblendr.common.Const.MONET_SEED_COLOR
@@ -85,6 +86,13 @@ class BroadcastListener : BroadcastReceiver() {
                     }
                 }
 
+                // TODO: better way to observe wallpaper colors changes
+                ACTION_REFRESH -> {
+                    sleepRunnable?.let {
+                        handleWallpaperChanged(context)
+                    }
+                }
+
                 Intent.ACTION_CONFIGURATION_CHANGED -> {
                     if (lastOrientation == currentOrientation) {
                         validateRootAndUpdateColors(context) {
@@ -108,7 +116,8 @@ class BroadcastListener : BroadcastReceiver() {
             if (intent.action in listOf(
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_WALLPAPER_CHANGED
+                    Intent.ACTION_WALLPAPER_CHANGED,
+                    ACTION_REFRESH
                 )
             ) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
@@ -140,10 +149,10 @@ class BroadcastListener : BroadcastReceiver() {
             if (wallpaperColors == lastColors) {
                 return
             } else {
-            putString(WALLPAPER_COLOR_LIST, Const.GSON.toJson(wallpaperColors))
+                putString(WALLPAPER_COLOR_LIST, Const.GSON.toJson(wallpaperColors))
 
-            if (!getBoolean(MONET_SEED_COLOR_ENABLED, false)) {
-                putInt(MONET_SEED_COLOR, wallpaperColors[0])
+                if (!getBoolean(MONET_SEED_COLOR_ENABLED, false)) {
+                    putInt(MONET_SEED_COLOR, wallpaperColors[0])
                 }
 
                 lastColors = wallpaperColors
