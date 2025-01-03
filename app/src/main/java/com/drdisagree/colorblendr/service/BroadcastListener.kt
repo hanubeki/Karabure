@@ -43,6 +43,7 @@ class BroadcastListener : BroadcastReceiver() {
     private val handler = Handler(Looper.getMainLooper())
     private var sleepRunnable: Runnable? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private var lastColors = ArrayList<Int>()
 
     @Suppress("deprecation")
     override fun onReceive(context: Context, intent: Intent) {
@@ -135,10 +136,17 @@ class BroadcastListener : BroadcastReceiver() {
             val wallpaperColors = withContext(Dispatchers.IO) {
                 getWallpaperColors(context)
             }
+
+            if (wallpaperColors == lastColors) {
+                return
+            } else {
             putString(WALLPAPER_COLOR_LIST, Const.GSON.toJson(wallpaperColors))
 
             if (!getBoolean(MONET_SEED_COLOR_ENABLED, false)) {
                 putInt(MONET_SEED_COLOR, wallpaperColors[0])
+                }
+
+                lastColors = wallpaperColors
             }
         }
 
