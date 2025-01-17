@@ -8,6 +8,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.common.Const
+import com.drdisagree.colorblendr.common.Const.ACTION_REFRESH
 import com.drdisagree.colorblendr.common.Const.FABRICATED_OVERLAY_NAME_APPS
 import com.drdisagree.colorblendr.common.Const.MONET_LAST_UPDATED
 import com.drdisagree.colorblendr.common.Const.MONET_SEED_COLOR
@@ -82,6 +83,13 @@ class BroadcastListener : BroadcastReceiver() {
                     sleepRunnable?.let { runnable ->
                         handler.removeCallbacks(runnable)
                         sleepRunnable = null
+                    }
+                }
+
+                // TODO: better way to observe wallpaper colors changes
+                ACTION_REFRESH -> {
+                    sleepRunnable?.let {
+                        handleWallpaperChanged(context)
                     }
                 }
 
