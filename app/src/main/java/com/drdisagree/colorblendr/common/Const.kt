@@ -23,6 +23,9 @@ object Const {
     const val SETTINGS_SEARCH = "com.google.android.settings.intelligence"
     const val PIXEL_LAUNCHER = "com.google.android.apps.nexuslauncher"
 
+    // Intent actions
+    const val ACTION_REFRESH = "${BuildConfig.APPLICATION_ID}.intent.REFRESH"
+
     // General preferences
     const val FIRST_RUN = "firstRun"
     const val THEMING_ENABLED = "themingEnabled"
