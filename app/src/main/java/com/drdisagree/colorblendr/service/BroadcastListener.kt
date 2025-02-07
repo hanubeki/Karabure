@@ -73,7 +73,7 @@ class BroadcastListener : BroadcastReceiver() {
                                 handleWallpaperChanged(context)
                             }
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
+                        handler.postDelayed(sleepRunnable!!, 5000) // 5 seconds
                     }
                 }
 
