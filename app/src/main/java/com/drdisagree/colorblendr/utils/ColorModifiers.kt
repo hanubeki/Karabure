@@ -1,6 +1,5 @@
 package com.drdisagree.colorblendr.utils
 
-import android.graphics.Color
 import com.drdisagree.colorblendr.config.RPrefs
 import com.drdisagree.colorblendr.utils.ColorUtil.getAdjustedChroma
 import com.drdisagree.colorblendr.utils.ColorUtil.getAdjustedLightness
@@ -66,21 +65,21 @@ object ColorModifiers {
         if (accentPalette) {
             if (accentSaturation && !isMonochrome) {
                 // Set accent saturation
-                for (j in tones.indices) {
+                for (j in outChromas.indices) {
                     outChromas[j] = getAdjustedChroma(palette, outTones[j], monetAccentSaturation)
                 }
             }
         } else {
             if (backgroundLightness && !isMonochrome) {
                 // Set background lightness
-                for (j in tones.indices) {
+                for (j in outTones.indices) {
                     outTones[j] = getAdjustedLightness(monetBackgroundLightness, j + 1)
                 }
             }
 
             if (backgroundSaturation && !isMonochrome && !isRainbow) {
                 // Set background saturation
-                for (j in tones.indices) {
+                for (j in outChromas.indices) {
                     outChromas[j] = getAdjustedChroma(palette, outTones[j], monetBackgroundSaturation)
                 }
             }
@@ -88,7 +87,7 @@ object ColorModifiers {
 
         if (isMonochrome) {
             // Set monochrome lightness
-            for (j in tones.indices) {
+            for (j in outTones.indices) {
                 outTones[j] = getAdjustedLightness(monetBackgroundLightness, j + 1)
             }
         }
@@ -112,7 +111,7 @@ object ColorModifiers {
         }
 
         if (overrideColors) {
-            for (j in 0 until tones.size - 1) {
+            for (j in 0 until colors.size - 1) {
                 val i = counter.get() - 1
 
                 val overriddenColor = RPrefs.getInt(systemPaletteNames[i][j + 1], Int.MIN_VALUE)
