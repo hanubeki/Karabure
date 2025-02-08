@@ -101,6 +101,10 @@ object ColorModifiers {
             }
         }
 
+        // Limiting chroma for lightness 99 and 95
+        outChromas[0] = outChromas[0].coerceAtMost(40.0)
+        outChromas[1] = outChromas[1].coerceAtMost(40.0)
+
         val colors = ArrayList<Int>()
 
         for (j in tones.indices) {
