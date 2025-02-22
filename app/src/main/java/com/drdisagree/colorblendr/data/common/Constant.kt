@@ -28,6 +28,9 @@ object Constant {
     const val SETTINGS_SEARCH = "com.google.android.settings.intelligence"
     const val PIXEL_LAUNCHER = "com.google.android.apps.nexuslauncher"
 
+    // Intent actions
+    const val ACTION_REFRESH = "${OWN_PACKAGE_NAME}.intent.action.REFRESH"
+
     // Request codes
     const val SHIZUKU_PERMISSION_REQUEST_ID = 100
 
