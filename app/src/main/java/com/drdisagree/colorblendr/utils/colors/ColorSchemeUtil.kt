@@ -28,12 +28,10 @@ object ColorSchemeUtil {
         @ColorInt color: Int,
         isDark: Boolean = SystemUtil.isDarkMode,
         contrast: Int = 5
-    ): ArrayList<ArrayList<Int>> {
-        val palette = ArrayList<ArrayList<Int>>()
-
+    ): ArrayList<TonalPalette> {
         val dynamicScheme = getDynamicScheme(style, color, isDark, contrast)
 
-        val tonalPalettes = arrayOf(
+        val tonalPalettes: ArrayList<TonalPalette> = arrayListOf(
             dynamicScheme.primaryPalette,
             dynamicScheme.secondaryPalette,
             dynamicScheme.tertiaryPalette,
@@ -41,11 +39,7 @@ object ColorSchemeUtil {
             dynamicScheme.neutralVariantPalette
         )
 
-        for (tonalPalette in tonalPalettes) {
-            palette.add(createToneList(tonalPalette))
-        }
-
-        return palette
+        return tonalPalettes
     }
 
     private fun getDynamicScheme(
