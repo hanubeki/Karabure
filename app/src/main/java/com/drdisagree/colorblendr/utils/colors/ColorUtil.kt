@@ -18,7 +18,9 @@ import com.drdisagree.colorblendr.data.enums.MONET
 import com.drdisagree.colorblendr.utils.app.SystemUtil
 import com.drdisagree.colorblendr.utils.cam.Cam
 import com.drdisagree.colorblendr.utils.cam.CamUtils
+import com.drdisagree.colorblendr.utils.cam.HctSolver
 import com.drdisagree.colorblendr.utils.colors.ColorSchemeUtil.generateColorPalette
+import com.drdisagree.colorblendr.utils.monet.palettes.TonalPalette
 import com.google.android.material.color.DynamicColors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
@@ -75,7 +77,7 @@ object ColorUtil {
         isDark: Boolean,
         overrideColors: Boolean
     ): ArrayList<ArrayList<Int>> {
-        val palette: ArrayList<ArrayList<Int>> = generateColorPalette(
+        val palette: ArrayList<TonalPalette> = generateColorPalette(
             style,
             seedColor,
             isDark
@@ -83,26 +85,23 @@ object ColorUtil {
 
         // Set custom secondary accent color
         if (secondaryColorEnabled()) {
-            palette[1] = generateColorPalette(
-                style,
-                getSecondaryColorValue(),
-                isDark
-            )[0]
+            val secondaryHue = getHue(getSecondaryColorValue())
+            palette[1] = TonalPalette.fromHueAndChroma(secondaryHue.toDouble(), palette[1].chroma)
         }
 
         // Set custom tertiary accent color
         if (tertiaryColorEnabled()) {
-            palette[2] = generateColorPalette(
-                style,
-                getTertiaryColorValue(),
-                isDark
-            )[0]
+            val tertiaryHue = getHue(getTertiaryColorValue())
+            palette[2] = TonalPalette.fromHueAndChroma(tertiaryHue.toDouble(), palette[2].chroma)
         }
+
+        val outPalette = ArrayList<ArrayList<Int>>()
 
         // Modify colors
         for (i in palette.indices) {
+            val colors = arrayListOf(Color.WHITE)
             val modifiedShades = ColorModifiers.modifyColors(
-                ArrayList(palette[i].subList(1, palette[i].size)),
+                palette[i],
                 AtomicInteger(i),
                 style,
                 accentSaturation,
@@ -113,12 +112,12 @@ object ColorUtil {
                 modifyPitchBlack,
                 overrideColors
             )
-            for (j in 1 until palette[i].size) {
-                palette[i][j] = modifiedShades[j - 1]
-            }
+            colors.addAll(modifiedShades)
+
+            outPalette.add(colors)
         }
 
-        return palette
+        return outPalette
     }
 
     @ColorInt
@@ -132,26 +131,6 @@ object ColorUtil {
         return typedValue.data
     }
 
-    fun adjustSaturation(color: Int, saturation: Int): Int {
-        val saturationFloat = (saturation - 100) / 100f
-
-        val cam = Cam.fromInt(color)
-        var chroma = cam.chroma
-        val lstar = CamUtils.lstarFromInt(color)
-
-        // Get a color with maximum chroma (200f is from VIBRANT accent 1 palette)
-        val targetInt = Cam.getInt(cam.hue, 200f, lstar)
-        val target = Cam.fromInt(targetInt)
-
-        if (saturationFloat > 0) {
-            chroma += ((target.chroma - chroma) * saturationFloat)
-        } else if (saturationFloat < 0) {
-            chroma += (chroma * saturationFloat)
-        }
-
-        return Cam.getInt(cam.hue, chroma, lstar)
-    }
-
     fun adjustLightness(color: Int, brightnessPercentage: Int): Int {
         val clampedPercentage = brightnessPercentage.coerceIn(-100, 100)
 
@@ -163,7 +142,24 @@ object ColorUtil {
         return Cam.getInt(cam.hue, cam.chroma, adjustedLStar)
     }
 
-    fun shiftLightness(color: Int, lightness: Int, idx: Int): Int {
+    fun getAdjustedChroma(palette: TonalPalette, lstar: Double, saturation: Int): Double {
+        val saturationFloat = (saturation - 100) / 100f
+        var chroma = palette.chroma
+
+        // Get a color with maximum chroma (200f is from VIBRANT accent 1 palette)
+        val target = HctSolver.solveToCam(palette.hue, 200.0, lstar)
+        chroma = chroma.coerceAtMost(target.chroma.toDouble())
+
+        if (saturationFloat > 0) {
+            chroma += ((target.chroma - chroma) * saturationFloat)
+        } else if (saturationFloat < 0) {
+            chroma += (chroma * saturationFloat)
+        }
+
+        return chroma
+    }
+
+    fun getAdjustedLightness(lightness: Int, idx: Int): Double {
         var lightnessFloat = (lightness - 100) / 1000f
         val shade = systemTintList[idx]
 
@@ -173,10 +169,7 @@ object ColorUtil {
             2 -> lightnessFloat /= 2f
         }
 
-        val cam = Cam.fromInt(color)
-        val lstar = 100f * (shade + lightnessFloat)
-
-        return Cam.getInt(cam.hue, cam.chroma, lstar)
+        return 100.0 * (shade + lightnessFloat)
     }
 
     fun getHue(color: Int): Float {
