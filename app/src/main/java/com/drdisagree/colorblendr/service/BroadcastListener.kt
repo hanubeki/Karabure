@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.data.common.Constant
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_NAME_APPS
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getLastColorAppliedTimestamp
@@ -68,7 +69,7 @@ class BroadcastListener : BroadcastReceiver() {
                                 handleWallpaperChanged(context)
                             }
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
+                        handler.postDelayed(sleepRunnable!!, 5000) // 5 seconds
                     }
                 }
 
@@ -76,6 +77,13 @@ class BroadcastListener : BroadcastReceiver() {
                     sleepRunnable?.let { runnable ->
                         handler.removeCallbacks(runnable)
                         sleepRunnable = null
+                    }
+                }
+
+                // TODO: better way to observe wallpaper colors changes
+                ACTION_REFRESH -> {
+                    sleepRunnable?.let {
+                        handleWallpaperChanged(context)
                     }
                 }
 
