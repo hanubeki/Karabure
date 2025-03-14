@@ -1,9 +1,12 @@
 package com.drdisagree.colorblendr.service
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.WallpaperManager
+import android.app.WallpaperManager.OnColorsChangedListener
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,7 +14,9 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.content.res.Configuration
 import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
 import android.util.Log
@@ -21,6 +26,7 @@ import com.drdisagree.colorblendr.BuildConfig
 import com.drdisagree.colorblendr.ColorBlendr.Companion.appContext
 import com.drdisagree.colorblendr.ColorBlendr.Companion.rootConnection
 import com.drdisagree.colorblendr.R
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuMode
 import com.drdisagree.colorblendr.provider.RootConnectionProvider
@@ -36,7 +42,14 @@ import java.util.TimerTask
 
 class AutoStartService : Service() {
 
+    private val handler = Handler(Looper.getMainLooper())
     private var notificationManager: NotificationManager? = null
+    private val onColorsChangedListener = OnColorsChangedListener { _, _ ->
+        val intent = Intent(ACTION_REFRESH).apply {
+            setPackage(BuildConfig.APPLICATION_ID)
+        }
+        sendBroadcast(intent)
+    }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -54,6 +67,8 @@ class AutoStartService : Service() {
         if (BroadcastListener.isLastConfigInitialized.not()) {
             BroadcastListener.lastConfig = Configuration(resources.configuration)
         }
+
+        WallpaperManager.getInstance(this)?.addOnColorsChangedListener(onColorsChangedListener, handler)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -74,6 +89,8 @@ class AutoStartService : Service() {
 
         isRunning = false
         Log.i(TAG, "onDestroy: Service is destroyed :(")
+
+        WallpaperManager.getInstance(this)?.removeOnColorsChangedListener(onColorsChangedListener)
 
         try {
             unregisterReceiver(myReceiver)
@@ -145,6 +162,7 @@ class AutoStartService : Service() {
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceivers() {
         val intentFilterWithoutScheme = IntentFilter().apply {
             @Suppress("DEPRECATION")
@@ -166,8 +184,17 @@ class AutoStartService : Service() {
             addDataScheme("package")
         }
 
+        val customIntentFilter = IntentFilter().apply {
+            addAction(ACTION_REFRESH)
+        }
+
         registerReceiver(myReceiver, intentFilterWithoutScheme)
         registerReceiver(myReceiver, intentFilterWithScheme)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(myReceiver, customIntentFilter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(myReceiver, customIntentFilter)
+        }
     }
 
     private fun setupSystemUIRestartListener() {

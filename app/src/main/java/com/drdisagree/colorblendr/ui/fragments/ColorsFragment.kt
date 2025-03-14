@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.R
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Constant.MONET_SEED_COLOR_ENABLED
 import com.drdisagree.colorblendr.data.common.Utilities.clearAllOverriddenColors
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
@@ -266,6 +267,7 @@ class ColorsFragment : BaseFragment() {
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(Intent.ACTION_WALLPAPER_CHANGED)
+        intentFilter.addAction(ACTION_REFRESH)
 
         LocalBroadcastManager
             .getInstance(requireContext())
