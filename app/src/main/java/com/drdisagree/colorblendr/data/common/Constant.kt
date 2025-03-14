@@ -34,6 +34,9 @@ object Constant {
     const val THEME_PICKER = "com.android.wallpaper"
     const val THEME_PICKER_GOOGLE = "com.google.android.apps.wallpaper"
 
+    // Intent actions
+    const val ACTION_REFRESH = "${OWN_PACKAGE_NAME}.intent.action.REFRESH"
+
     // Request codes
     const val SHIZUKU_PERMISSION_REQUEST_ID = 100
 
