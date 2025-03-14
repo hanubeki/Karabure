@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.data.common.Constant
@@ -39,9 +37,8 @@ import kotlin.math.abs
 
 class BroadcastListener : BroadcastReceiver() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var sleepRunnable: Runnable? = null
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private var isScreenOff = false
+    private var isChangeQueued = false
 
     @Suppress("deprecation")
     override fun onReceive(context: Context, intent: Intent) {
@@ -64,26 +61,25 @@ class BroadcastListener : BroadcastReceiver() {
 
                 Intent.ACTION_SCREEN_OFF -> {
                     if (screenOffColorUpdateEnabled()) {
-                        sleepRunnable = Runnable {
-                            coroutineScope.launch {
-                                handleWallpaperChanged(context)
-                            }
+                        if (isChangeQueued) {
+                            handleWallpaperChanged(context)
+                            isChangeQueued = false
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
+
+                        isScreenOff = true
                     }
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
-                    sleepRunnable?.let { runnable ->
-                        handler.removeCallbacks(runnable)
-                        sleepRunnable = null
-                    }
+                    isScreenOff = false
                 }
 
                 // TODO: better way to observe wallpaper colors changes
                 ACTION_REFRESH -> {
-                    sleepRunnable?.let {
+                    if (isScreenOff) {
                         handleWallpaperChanged(context)
+                    } else {
+                        isChangeQueued = true
                     }
                 }
 
