@@ -142,7 +142,37 @@ object ColorUtil {
         return Cam.getInt(cam.hue, cam.chroma, adjustedLStar)
     }
 
+    fun isFullySaturated(color: Int): Boolean {
+        when (color and 0xFFFFFF) {
+            0x000000, 0xFFFFFF -> return false
+        }
+
+        val r = Color.red(color)
+        val g = Color.green(color)
+        val b = Color.blue(color)
+
+        return r == 0x00 || r == 0xFF || g == 0x00 || g == 0xFF || b == 0x00 || b == 0xFF
+    }
+
+    fun isFullySaturated(hue: Double, chroma: Double, lstar: Double): Boolean {
+        return isFullySaturated(HctSolver.solveToInt(hue, chroma, lstar))
+    }
+
+    fun isFullySaturated(palette: TonalPalette, lstar: Double): Boolean {
+        return isFullySaturated(HctSolver.solveToInt(palette.hue, palette.chroma, lstar))
+    }
+
     fun getAdjustedChroma(palette: TonalPalette, lstar: Double, saturation: Int): Double {
+        if (saturation >= 200) {
+            // Always use maximum chroma
+            return 200.0
+        }
+
+        if (isFullySaturated(palette, lstar) && saturation >= 100) {
+            // Don't modify the value as it is already fully saturated
+            return palette.chroma
+        }
+
         val saturationFloat = (saturation - 100) / 100f
         var chroma = palette.chroma
 
