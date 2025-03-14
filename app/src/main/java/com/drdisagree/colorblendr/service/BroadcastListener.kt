@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.data.common.Constant
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_NAME_APPS
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getLastColorAppliedTimestamp
@@ -81,6 +82,13 @@ class BroadcastListener : BroadcastReceiver() {
                     }
                 }
 
+                // TODO: better way to observe wallpaper colors changes
+                ACTION_REFRESH -> {
+                    sleepRunnable?.let {
+                        handleWallpaperChanged(context)
+                    }
+                }
+
                 Intent.ACTION_CONFIGURATION_CHANGED -> {
                     delay(1000)
 
@@ -110,7 +118,8 @@ class BroadcastListener : BroadcastReceiver() {
             if (intent.action in listOf(
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_WALLPAPER_CHANGED
+                    Intent.ACTION_WALLPAPER_CHANGED,
+                    ACTION_REFRESH
                 )
             ) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
