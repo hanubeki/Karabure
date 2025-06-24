@@ -56,7 +56,12 @@ class BroadcastListener : BroadcastReceiver() {
                 }
 
                 Intent.ACTION_WALLPAPER_CHANGED -> {
-                    handleWallpaperChanged(context, true)
+                    if (isScreenOff || !screenOffColorUpdateEnabled()) {
+                        handleWallpaperChanged(context, true)
+                        isChangeQueued = false
+                    } else {
+                        isChangeQueued = true
+                    }
                 }
 
                 Intent.ACTION_SCREEN_OFF -> {
@@ -76,8 +81,9 @@ class BroadcastListener : BroadcastReceiver() {
 
                 // TODO: better way to observe wallpaper colors changes
                 ACTION_REFRESH -> {
-                    if (isScreenOff) {
-                        handleWallpaperChanged(context)
+                    if (isScreenOff || !screenOffColorUpdateEnabled()) {
+                        handleWallpaperChanged(context, true)
+                        isChangeQueued = false
                     } else {
                         isChangeQueued = true
                     }
