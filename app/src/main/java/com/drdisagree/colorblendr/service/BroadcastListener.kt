@@ -56,7 +56,9 @@ class BroadcastListener : BroadcastReceiver() {
                 }
 
                 Intent.ACTION_WALLPAPER_CHANGED -> {
-                    if (isScreenOff || !screenOffColorUpdateEnabled()) {
+                    val fromForegroundApp = intent.getBooleanExtra("android.service.wallpaper.extra.FROM_FOREGROUND_APP", false)
+
+                    if (isScreenOff || !screenOffColorUpdateEnabled() || fromForegroundApp) {
                         handleWallpaperChanged(context, true)
                         isChangeQueued = false
                     } else {
