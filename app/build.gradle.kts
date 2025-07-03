@@ -125,4 +125,5 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.zip4j)
+    implementation(libs.muzei.api)
 }
