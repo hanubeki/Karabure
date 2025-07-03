@@ -26,6 +26,7 @@ shizuku = "13.1.5"
 workRuntime = "2.10.3"
 lifecycleCommonJvm = "2.9.2"
 zip4j = "2.11.5"
+muzei-api = "3.4.2"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -63,3 +64,4 @@ shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizu
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 lifecycle-common-jvm = { group = "androidx.lifecycle", name = "lifecycle-common-jvm", version.ref = "lifecycleCommonJvm" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
+muzei-api = { module = "com.google.android.apps.muzei:muzei-api", version.ref = "muzei-api" }
