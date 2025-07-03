@@ -28,6 +28,7 @@ sunSecurityAndroid = "1.1"
 workRuntime = "2.11.1"
 lifecycleCommonJvm = "2.10.0"
 zip4j = "2.11.6"
+muzei-api = "3.4.2"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -67,3 +68,4 @@ sun-security-android = { module = "com.github.MuntashirAkon:sun-security-android
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 lifecycle-common-jvm = { group = "androidx.lifecycle", name = "lifecycle-common-jvm", version.ref = "lifecycleCommonJvm" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
+muzei-api = { module = "com.google.android.apps.muzei:muzei-api", version.ref = "muzei-api" }
