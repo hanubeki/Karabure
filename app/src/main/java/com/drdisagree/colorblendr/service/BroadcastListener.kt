@@ -146,7 +146,7 @@ class BroadcastListener : BroadcastReceiver() {
 
             setWallpaperColorJson(currentWallpaperColors)
 
-            if (!customColorEnabled()) {
+            if (!customColorEnabled() && requiresUpdate) {
                 setSeedColorValue(wallpaperColors[0])
             }
         }
