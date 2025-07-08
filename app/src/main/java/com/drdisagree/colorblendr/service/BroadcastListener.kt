@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.drdisagree.colorblendr.data.common.Constant
@@ -34,14 +32,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 class BroadcastListener : BroadcastReceiver() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var sleepRunnable: Runnable? = null
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private var isScreenOff = false
+    private val mutex = Mutex()
 
     @Suppress("deprecation")
     override fun onReceive(context: Context, intent: Intent) {
@@ -59,31 +58,44 @@ class BroadcastListener : BroadcastReceiver() {
                 }
 
                 Intent.ACTION_WALLPAPER_CHANGED -> {
-                    handleWallpaperChanged(context, true)
+                    val fromForegroundApp = intent.getBooleanExtra("android.service.wallpaper.extra.FROM_FOREGROUND_APP", false)
+
+                    mutex.withLock {
+                        if (isScreenOff || !screenOffColorUpdateEnabled() || fromForegroundApp) {
+                            handleWallpaperChanged(context, true)
+                        } else {
+                            handleWallpaperChanged(context, applyNow = false)
+                        }
+                    }
                 }
 
                 Intent.ACTION_SCREEN_OFF -> {
                     if (screenOffColorUpdateEnabled()) {
-                        sleepRunnable = Runnable {
-                            coroutineScope.launch {
-                                handleWallpaperChanged(context)
+                        mutex.withLock {
+                            if (requiresUpdate) {
+                                requiresUpdate = false
+                                validateRootAndUpdateColors(context) {
+                                    updateAllColors(true)
+                                }
                             }
+
+                            isScreenOff = true
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
                     }
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
-                    sleepRunnable?.let { runnable ->
-                        handler.removeCallbacks(runnable)
-                        sleepRunnable = null
-                    }
+                    isScreenOff = false
                 }
 
                 // TODO: better way to observe wallpaper colors changes
                 ACTION_REFRESH -> {
-                    sleepRunnable?.let {
-                        handleWallpaperChanged(context)
+                    mutex.withLock {
+                        if (isScreenOff || !screenOffColorUpdateEnabled()) {
+                            handleWallpaperChanged(context, true)
+                        } else {
+                            handleWallpaperChanged(context, applyNow = false)
+                        }
                     }
                 }
 
@@ -140,7 +152,7 @@ class BroadcastListener : BroadcastReceiver() {
         }
     }
 
-    private suspend fun handleWallpaperChanged(context: Context, force: Boolean = false) {
+    private suspend fun handleWallpaperChanged(context: Context, force: Boolean = false, applyNow: Boolean = true) {
         if (permissionsGranted(context)) {
             val wallpaperColors = withContext(Dispatchers.IO) {
                 getWallpaperColors(context)
@@ -160,7 +172,7 @@ class BroadcastListener : BroadcastReceiver() {
             }
         }
 
-        if (requiresUpdate || force) {
+        if ((requiresUpdate || force) && applyNow) {
             requiresUpdate = false
             validateRootAndUpdateColors(context) {
                 updateAllColors(true)
