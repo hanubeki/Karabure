@@ -11,6 +11,7 @@ import android.util.Log
 import android.util.Size
 import com.drdisagree.colorblendr.ColorBlendr.Companion.appContext
 import com.drdisagree.colorblendr.data.common.Constant
+import com.drdisagree.colorblendr.data.common.Constant.MUZEI
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorJson
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
@@ -20,6 +21,7 @@ import com.drdisagree.colorblendr.utils.app.AppUtil
 import com.drdisagree.colorblendr.utils.colors.ColorUtil
 import com.drdisagree.colorblendr.utils.monet.quantize.QuantizerCelebi
 import com.drdisagree.colorblendr.utils.monet.score.Score
+import com.google.android.apps.muzei.api.MuzeiContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -63,14 +65,27 @@ object WallpaperColorUtil {
         val wallpaperManager = WallpaperManager.getInstance(context)
         var isLiveWallpaper = false
 
-        wallpaperManager.wallpaperInfo?.let {
+        wallpaperManager.wallpaperInfo?.let { info ->
             isLiveWallpaper = true
-            wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
-                ?.let { wallpaperColors ->
-                    mergedColors.add(wallpaperColors.primaryColor.toArgb())
-                    wallpaperColors.secondaryColor?.let { mergedColors.add(it.toArgb()) }
-                    wallpaperColors.tertiaryColor?.let { mergedColors.add(it.toArgb()) }
+
+            if (info.packageName == MUZEI) {
+                try {
+                    withContext(Dispatchers.IO) {
+                        MuzeiContract.Artwork.getCurrentArtworkBitmap(context)
+                    }?.let { bitmap ->
+                        mergedColors.addAll(getWallpaperColors(bitmap))
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error getting bitmap from Muzei API", e)
                 }
+            } else {
+                wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+                    ?.let { wallpaperColors ->
+                        mergedColors.add(wallpaperColors.primaryColor.toArgb())
+                        wallpaperColors.secondaryColor?.let { mergedColors.add(it.toArgb()) }
+                        wallpaperColors.tertiaryColor?.let { mergedColors.add(it.toArgb()) }
+                    }
+            }
         }
 
         return try {
