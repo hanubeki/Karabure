@@ -133,8 +133,24 @@ object ColorUtil {
         return typedValue.data
     }
 
+    fun Int.isFullySaturated(): Boolean {
+        when (this and 0xFFFFFF) {
+            0x000000, 0xFFFFFF -> return false
+        }
+
+        val r = Color.red(this)
+        val g = Color.green(this)
+        val b = Color.blue(this)
+
+        return r == 0x00 || r == 0xFF || g == 0x00 || g == 0xFF || b == 0x00 || b == 0xFF
+    }
+
     fun adjustSaturation(color: Int, saturation: Int): Int {
         val saturationFloat = (saturation - 100) / 100f
+
+        if (saturation >= 100 && color.isFullySaturated()) {
+            return color
+        }
 
         val cam = Cam.fromInt(color)
         var chroma = cam.chroma
@@ -143,6 +159,10 @@ object ColorUtil {
         // Get a color with maximum chroma (200f is from VIBRANT accent 1 palette)
         val targetInt = Cam.getInt(cam.hue, 200f, lstar)
         val target = Cam.fromInt(targetInt)
+
+        if (saturation >= 200) {
+            return targetInt
+        }
 
         if (saturationFloat > 0) {
             chroma += ((target.chroma - chroma) * saturationFloat)
