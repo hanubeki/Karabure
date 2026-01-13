@@ -168,4 +168,5 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.zip4j)
     implementation(libs.sun.security.android)
+    implementation(libs.muzei.api)
 }
