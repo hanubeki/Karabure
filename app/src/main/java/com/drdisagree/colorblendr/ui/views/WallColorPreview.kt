@@ -20,6 +20,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getBackgroundSaturation
 import com.drdisagree.colorblendr.data.common.Utilities.getCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.pitchBlackThemeEnabled
 import com.drdisagree.colorblendr.utils.app.SystemUtil
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.adjustColorLightness
 import com.drdisagree.colorblendr.utils.colors.ColorUtil.calculateTextColor
 import com.drdisagree.colorblendr.utils.colors.ColorUtil.generateModifiedColors
 import kotlinx.coroutines.CoroutineScope
@@ -237,10 +238,10 @@ class WallColorPreview : View {
                     }
 
                 withContext(Dispatchers.Main) {
-                    setHalfCircleColor(colorPalette!![0][4])
-                    setFirstQuarterCircleColor(colorPalette!![2][5])
-                    setSecondQuarterCircleColor(colorPalette!![1][6])
-                    setSquareColor(colorPalette!![4][if (!isDarkMode) 3 else 9])
+                    setHalfCircleColor(colorPalette!![0][if (!isDarkMode) 8 else 4])
+                    setFirstQuarterCircleColor(adjustColorLightness(colorPalette!![1][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
+                    setSecondQuarterCircleColor(colorPalette!![2][5])
+                    setSquareColor(colorPalette!![4][if (!isDarkMode) 1 else 10])
                     setCenterCircleColor(color)
                     invalidateColors()
                 }

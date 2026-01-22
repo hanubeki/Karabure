@@ -28,6 +28,7 @@ import com.drdisagree.colorblendr.databinding.FragmentThemeBinding
 import com.drdisagree.colorblendr.utils.app.MiscUtil.setToolbarTitle
 import com.drdisagree.colorblendr.utils.app.SystemUtil.isDarkMode
 import com.drdisagree.colorblendr.utils.colors.ColorUtil
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.adjustColorLightness
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -205,46 +206,46 @@ class ThemeFragment : BaseFragment() {
         val isDarkMode: Boolean = isDarkMode
 
         binding.colorAccent1.colorContainer.apply {
-            setHalfCircleColor(colorPalette[0][4])
-            setFirstQuarterCircleColor(colorPalette[0][5])
+            setHalfCircleColor(colorPalette[0][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorPalette[0][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
             setSecondQuarterCircleColor(colorPalette[0][6])
-            setSquareColor(colorPalette[0][if (!isDarkMode) 3 else 9])
+            setSquareColor(colorPalette[0][if (!isDarkMode) 1 else 10])
             setPadding(8f)
             invalidateColors()
         }
 
         binding.colorAccent2.colorContainer.apply {
-            setHalfCircleColor(colorPalette[1][4])
-            setFirstQuarterCircleColor(colorPalette[1][5])
+            setHalfCircleColor(colorPalette[1][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorPalette[1][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
             setSecondQuarterCircleColor(colorPalette[1][6])
-            setSquareColor(colorPalette[1][if (!isDarkMode) 3 else 9])
+            setSquareColor(colorPalette[1][if (!isDarkMode) 1 else 10])
             setPadding(8f)
             invalidateColors()
         }
 
         binding.colorAccent3.colorContainer.apply {
-            setHalfCircleColor(colorPalette[2][4])
-            setFirstQuarterCircleColor(colorPalette[2][5])
-            setSecondQuarterCircleColor(colorPalette[2][6])
-            setSquareColor(colorPalette[2][if (!isDarkMode) 3 else 9])
+            setHalfCircleColor(colorPalette[2][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorPalette[2][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
+            setSecondQuarterCircleColor(colorPalette[2][5])
+            setSquareColor(colorPalette[2][if (!isDarkMode) 1 else 10])
             setPadding(8f)
             invalidateColors()
         }
 
         binding.colorNeutral1.colorContainer.apply {
-            setHalfCircleColor(colorPalette[3][4])
-            setFirstQuarterCircleColor(colorPalette[3][5])
-            setSecondQuarterCircleColor(colorPalette[3][6])
-            setSquareColor(colorPalette[3][if (!isDarkMode) 3 else 9])
+            setHalfCircleColor(colorPalette[3][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorPalette[3][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
+            setSecondQuarterCircleColor(colorPalette[3][5])
+            setSquareColor(colorPalette[3][if (!isDarkMode) 1 else 10])
             setPadding(8f)
             invalidateColors()
         }
 
         binding.colorNeutral2.colorContainer.apply {
-            setHalfCircleColor(colorPalette[4][4])
-            setFirstQuarterCircleColor(colorPalette[4][5])
-            setSecondQuarterCircleColor(colorPalette[4][6])
-            setSquareColor(colorPalette[4][if (!isDarkMode) 3 else 9])
+            setHalfCircleColor(colorPalette[4][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorPalette[4][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
+            setSecondQuarterCircleColor(colorPalette[4][5])
+            setSquareColor(colorPalette[4][if (!isDarkMode) 1 else 10])
             setPadding(8f)
             invalidateColors()
         }

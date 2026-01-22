@@ -15,6 +15,7 @@ import com.drdisagree.colorblendr.ui.views.ColorPreview
 import com.drdisagree.colorblendr.utils.app.MiscUtil.getOriginalString
 import com.drdisagree.colorblendr.utils.app.MiscUtil.setCardCornerRadius
 import com.drdisagree.colorblendr.utils.app.SystemUtil.isDarkMode
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.adjustColorLightness
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
@@ -109,10 +110,10 @@ class StylePreviewWidget : RelativeLayout {
         colorPalette = colorList
 
         colorContainer?.apply {
-            setHalfCircleColor(colorList[0][4])
-            setFirstQuarterCircleColor(colorList[2][5])
-            setSecondQuarterCircleColor(colorList[1][6])
-            setSquareColor(colorList[4][if (!isDarkMode) 2 else 9])
+            setHalfCircleColor(colorList[0][if (!isDarkMode) 8 else 4])
+            setFirstQuarterCircleColor(adjustColorLightness(colorList[1][if (!isDarkMode) 3 else 8], if (!isDarkMode) 85f else 35f))
+            setSecondQuarterCircleColor(colorList[2][5])
+            setSquareColor(colorList[4][if (!isDarkMode) 1 else 10])
             invalidateColors()
         }
     }
