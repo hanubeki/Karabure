@@ -150,6 +150,7 @@ Everything is anonymous — no account, sign-up, or personal data required. Subm
   | `randomColor` | Boolean | `true` | Picks a random vivid seed color |
   | `wallpaperColors` | Boolean | `true` | Switches back to wallpaper-based colors |
   | `monetStyle` | String | `TONAL_SPOT`, `VIBRANT`, `EXPRESSIVE`, `RAINBOW`, `FRUIT_SALAD`, `SPRITZ`, `MONOCHROMATIC`, `FIDELITY`, `CONTENT`, `CMF` | Sets the Monet style preset |
+  | `autoStyle` | Boolean | `true` | Choose the Monet style according to the seed color |
   | `accentSaturation` | Integer | `0`–`200` (100 = default) | Accent saturation slider |
   | `backgroundSaturation` | Integer | `0`–`200` (100 = default) | Background saturation slider |
   | `backgroundLightness` | Integer | `0`–`200` (100 = default) | Background lightness slider |
