@@ -4,12 +4,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import com.drdisagree.colorblendr.data.common.Constant.MONET_ACCENT_SATURATION_LIGHT
 import com.drdisagree.colorblendr.data.common.Constant.MONET_BACKGROUND_LIGHTNESS_LIGHT
 import com.drdisagree.colorblendr.data.common.Constant.MONET_BACKGROUND_SATURATION_LIGHT
+import com.drdisagree.colorblendr.data.common.Utilities.autoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getColorSpecVersion
+import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuThemingEnabled
@@ -17,15 +20,18 @@ import com.drdisagree.colorblendr.data.common.Utilities.isThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isWirelessAdbThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isWorkMethodUnknown
 import com.drdisagree.colorblendr.data.common.Utilities.modeSpecificThemesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
 import com.drdisagree.colorblendr.data.common.Utilities.screenOffColorUpdateEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setAccentSaturation
 import com.drdisagree.colorblendr.data.common.Utilities.setAccurateShadesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setBackgroundLightness
 import com.drdisagree.colorblendr.data.common.Utilities.setBackgroundSaturation
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setModeSpecificThemesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setPitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.taskerIntegrationEnabled
@@ -33,6 +39,7 @@ import com.drdisagree.colorblendr.data.config.Prefs
 import com.drdisagree.colorblendr.data.domain.PreviewController
 import com.drdisagree.colorblendr.data.enums.MONET.Companion.toEnumMonet
 import com.drdisagree.colorblendr.provider.RootConnectionProvider
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -89,7 +96,21 @@ class TaskerIntentReceiver : BroadcastReceiver() {
             val monet = style.toEnumMonet()
             if (monet.isAvailable(rootMode, getColorSpecVersion())) {
                 resetCustomStyleIfNotNull()
+                setAutoStyleEnabled(false)
                 setCurrentMonetStyle(monet)
+                changed = true
+            }
+        }
+
+        if (config.has(EXTRA_AUTO_STYLE)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || rootMode) {
+                setAutoStyleEnabled(config.optBoolean(EXTRA_AUTO_STYLE))
+                if (autoStyleEnabled()) {
+                    val monet = chooseMonetStyle(getSeedColorValue())
+                    resetCustomStyleIfNotNull()
+                    setCurrentMonetStyle(monet)
+                    setOriginalStyleName(monet.toString())
+                }
                 changed = true
             }
         }
@@ -170,6 +191,7 @@ class TaskerIntentReceiver : BroadcastReceiver() {
             intent.getStringExtra(key)?.let { config.put(key, it) }
         }
         arrayOf(
+            EXTRA_AUTO_STYLE,
             EXTRA_WALLPAPER_COLORS, EXTRA_RANDOM_COLOR,
             EXTRA_PITCH_BLACK, EXTRA_ACCURATE_SHADES
         ).forEach { key ->
@@ -194,6 +216,7 @@ class TaskerIntentReceiver : BroadcastReceiver() {
         private const val EXTRA_SEED_COLOR = "seedColor"
         private const val EXTRA_RANDOM_COLOR = "randomColor"
         private const val EXTRA_WALLPAPER_COLORS = "wallpaperColors"
+        private const val EXTRA_AUTO_STYLE = "autoStyle"
         private const val EXTRA_MONET_STYLE = "monetStyle"
         private const val EXTRA_ACCENT_SATURATION = "accentSaturation"
         private const val EXTRA_BACKGROUND_SATURATION = "backgroundSaturation"
