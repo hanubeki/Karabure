@@ -53,9 +53,18 @@
                 app:titleText="@string/pitch_black_theme_title" />
 
             <com.drdisagree.colorblendr.ui.widgets.SwitchWidget
-                android:id="@+id/custom_primary_color"
+                android:id="@+id/auto_style"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:icon="@drawable/ic_brush"
+                app:position="mid"
+                app:summaryText="Set styles according to chroma value, will choose between Tonal Spot, Vibrant and Neutral styles."
+                app:titleText="Auto Style" />
+
+            <com.drdisagree.colorblendr.ui.widgets.SwitchWidget
+                android:id="@+id/custom_primary_color"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 app:icon="@drawable/ic_color_fill"
                 app:position="mid"
                 app:summaryText="@string/custom_primary_color_desc"

@@ -29,6 +29,8 @@ import com.drdisagree.colorblendr.data.common.Utilities.accurateShadesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.clearAllOverriddenColors
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
+import com.drdisagree.colorblendr.data.common.Utilities.isAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isColorOverriddenFor
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuThemingEnabled
@@ -36,10 +38,14 @@ import com.drdisagree.colorblendr.data.common.Utilities.isThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isWirelessAdbThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.manualColorOverrideEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.pitchBlackThemeEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
 import com.drdisagree.colorblendr.data.common.Utilities.setAccurateShadesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setManualColorOverrideEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setPitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.setShizukuThemingEnabled
@@ -55,6 +61,7 @@ import com.drdisagree.colorblendr.utils.app.BackupRestore.restoreDatabaseAndPref
 import com.drdisagree.colorblendr.utils.app.MiscUtil.crossfade
 import com.drdisagree.colorblendr.utils.app.MiscUtil.setToolbarTitle
 import com.drdisagree.colorblendr.utils.app.parcelable
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import com.drdisagree.colorblendr.utils.colors.ColorUtil.systemPaletteNames
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.isOverlayEnabled
@@ -157,6 +164,20 @@ class SettingsFragment : BaseFragment() {
             updateColors()
         }
         binding.pitchBlackTheme.setEnabled(isRootMode())
+
+        // Auto Style
+        binding.autoStyle.isSwitchChecked = isAutoStyleEnabled()
+        binding.autoStyle.setSwitchChangeListener { _: CompoundButton?, isChecked: Boolean ->
+            resetCustomStyleIfNotNull()
+            setAutoStyleEnabled(isChecked)
+            if (isAutoStyleEnabled()) {
+                val monet = chooseMonetStyle(getSeedColorValue())
+                setCurrentMonetStyle(monet)
+                resetCustomStyle()
+                setOriginalStyleName(monet.toString())
+            }
+            updateColors()
+        }
 
         // Custom primary color
         binding.customPrimaryColor.isSwitchChecked = customColorEnabled()

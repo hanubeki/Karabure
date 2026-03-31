@@ -12,6 +12,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.clearOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.getCurrentCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.getCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
@@ -170,6 +171,7 @@ class StylePreviewAdapter(
 
                 coroutineScope.launch {
                     // update preferences and apply colors
+                    setAutoStyleEnabled(false)
                     setCurrentMonetStyle(styleData.monetStyle)
                     resetCustomStyle()
                     setOriginalStyleName(styleData.titleResId.getStyleNameForRootless())
@@ -206,6 +208,7 @@ class StylePreviewAdapter(
                     BackupRestore.restorePrefsMap(prefsMap)
 
                     // update preferences and apply colors
+                    setAutoStyleEnabled(false)
                     setCurrentCustomStyle(customStyle.styleId)
                     clearOriginalStyleName()
                     applyColorScheme()

@@ -48,6 +48,7 @@ object Constant {
     const val FIRST_RUN = "firstRun"
     const val THEMING_ENABLED = "themingEnabled"
     const val MONET_STYLE = "customMonetStyle"
+    const val AUTO_MONET_STYLE = "autoMonetStyle"
     const val CUSTOM_MONET_STYLE = "userGeneratedMonetStyle"
     const val MODE_SPECIFIC_THEMES = "modeSpecificThemes"
     const val SCREEN_OFF_UPDATE_COLORS = "screenOffUpdateColors"

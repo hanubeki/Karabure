@@ -3,6 +3,7 @@ package com.drdisagree.colorblendr.data.common
 import android.graphics.Color
 import com.drdisagree.colorblendr.data.common.Constant.APP_LIST_FILTER_METHOD
 import com.drdisagree.colorblendr.data.common.Constant.COLORSPEC_VERSION_2025
+import com.drdisagree.colorblendr.data.common.Constant.AUTO_MONET_STYLE
 import com.drdisagree.colorblendr.data.common.Constant.CUSTOM_MONET_STYLE
 import com.drdisagree.colorblendr.data.common.Constant.DARKER_LAUNCHER_ICONS
 import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_FOR_APPS_STATE
@@ -128,6 +129,14 @@ object Utilities {
 
     fun setCurrentCustomStyle(styleId: String) {
         putString(CUSTOM_MONET_STYLE, styleId)
+    }
+
+    fun isAutoStyleEnabled(): Boolean {
+        return getBoolean(AUTO_MONET_STYLE, false)
+    }
+
+    fun setAutoStyleEnabled(value: Boolean) {
+        putBoolean(AUTO_MONET_STYLE, value)
     }
 
     fun resetCustomStyle() {

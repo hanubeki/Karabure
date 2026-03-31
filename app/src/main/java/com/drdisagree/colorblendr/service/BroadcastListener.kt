@@ -14,18 +14,23 @@ import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getLastColorAppliedTimestamp
 import com.drdisagree.colorblendr.data.common.Utilities.getSelectedFabricatedApps
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorJson
+import com.drdisagree.colorblendr.data.common.Utilities.isAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isWirelessAdbThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isWorkMethodUnknown
+import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.screenOffColorUpdateEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.setSelectedFabricatedApps
 import com.drdisagree.colorblendr.data.common.Utilities.setWallpaperColorJson
 import com.drdisagree.colorblendr.data.common.Utilities.updateColorAppliedTimestamp
 import com.drdisagree.colorblendr.provider.RootConnectionProvider
 import com.drdisagree.colorblendr.utils.app.AppUtil.permissionsGranted
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColorsPerApp
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.unregisterFabricatedOverlay
@@ -149,6 +154,13 @@ class BroadcastListener : BroadcastReceiver() {
             setWallpaperColorJson(currentWallpaperColors)
 
             if (!customColorEnabled()) {
+                if (isAutoStyleEnabled()) {
+                    val monet = chooseMonetStyle(wallpaperColors[0])
+                    setCurrentMonetStyle(monet)
+                    resetCustomStyle()
+                    setOriginalStyleName(monet.toString())
+                }
+
                 setSeedColorValue(wallpaperColors[0])
             }
         }

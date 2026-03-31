@@ -184,6 +184,16 @@ object ColorUtil {
         return Cam.fromInt(color).hue
     }
 
+    fun chooseMonetStyle(@ColorInt color: Int): MONET {
+        val cam = Cam.fromInt(color)
+
+        return when {
+            cam.chroma < 18f -> MONET.SPRITZ
+            cam.chroma >= 60f -> MONET.VIBRANT
+            else -> MONET.TONAL_SPOT
+        }
+    }
+
     private val systemTintList: FloatArray by lazy {
         floatArrayOf(
             1.0f,
