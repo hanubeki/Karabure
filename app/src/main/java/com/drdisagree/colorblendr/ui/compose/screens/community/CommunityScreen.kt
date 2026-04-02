@@ -49,8 +49,10 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.drdisagree.colorblendr.R
+import com.drdisagree.colorblendr.data.common.Constant.KARABURE_STYLE
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.karabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.enums.CommunitySort
 import com.drdisagree.colorblendr.data.models.CommunityTheme
@@ -63,6 +65,7 @@ import com.drdisagree.colorblendr.ui.compose.components.SearchBar
 import com.drdisagree.colorblendr.ui.compose.components.SingleChoiceDialog
 import com.drdisagree.colorblendr.ui.compose.components.TurnstileChallenge
 import com.drdisagree.colorblendr.ui.compose.theme.ColorBlendrTheme
+import com.drdisagree.colorblendr.ui.compose.utils.rememberPrefState
 import com.drdisagree.colorblendr.ui.viewmodels.CommunityViewModel
 import com.drdisagree.colorblendr.utils.community.CommunityColorMatch
 import com.drdisagree.colorblendr.utils.community.CommunityThemeCodec
@@ -192,6 +195,7 @@ private fun CommunityScreenContent(
     }
 
     val rootMode = if (LocalInspectionMode.current) true else remember { isRootMode() }
+    var karabureStyle by rememberPrefState(KARABURE_STYLE) { karabureStyleEnabled() }
     var showShareDialog by rememberSaveable { mutableStateOf(false) }
 
     Surface(
@@ -206,7 +210,7 @@ private fun CommunityScreenContent(
                 actions = {
                     IconButton(
                         onClick = { showShareDialog = true },
-                        enabled = rootMode,
+                        enabled = rootMode && !karabureStyle,
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = MaterialTheme.colorScheme.onSurface
                         )

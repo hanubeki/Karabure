@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.Contrast
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Opacity
+import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.Widgets
@@ -42,6 +43,7 @@ import androidx.core.net.toUri
 import com.drdisagree.colorblendr.R
 import com.drdisagree.colorblendr.data.common.Constant.DARKER_LAUNCHER_ICONS
 import com.drdisagree.colorblendr.data.common.Constant.FORCE_PITCH_BLACK_SETTINGS
+import com.drdisagree.colorblendr.data.common.Constant.KARABURE_STYLE
 import com.drdisagree.colorblendr.data.common.Constant.MODE_SPECIFIC_THEMES
 import com.drdisagree.colorblendr.data.common.Constant.MONET_PITCH_BLACK_THEME
 import com.drdisagree.colorblendr.data.common.Constant.MONET_SECONDARY_COLOR
@@ -60,6 +62,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getSecondaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getSelectedFabricatedApps
 import com.drdisagree.colorblendr.data.common.Utilities.getTertiaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
+import com.drdisagree.colorblendr.data.common.Utilities.karabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.modeSpecificThemesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.pitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
@@ -69,6 +72,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.setColorSpecVersion
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setDarkerLauncherIconsEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setForcePitchBlackSettingsEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setModeSpecificThemesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setScreenOffColorUpdateEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setSecondaryColorValue
@@ -123,6 +127,7 @@ fun SettingsAdvancedScreen(
     val hasPixelLauncher = remember { SystemUtil.isAppInstalled(PIXEL_LAUNCHER) }
     val pitchBlackEnabled by rememberPrefState(MONET_PITCH_BLACK_THEME) { pitchBlackThemeEnabled() }
 
+    var karabureStyle by rememberPrefState(KARABURE_STYLE) { karabureStyleEnabled() }
     var secondaryColor by rememberPrefState(MONET_SECONDARY_COLOR) { getSecondaryColorValue() }
     var tertiaryColor by rememberPrefState(MONET_TERTIARY_COLOR) { getTertiaryColorValue() }
     var screenOffUpdate by rememberPrefState(SCREEN_OFF_UPDATE_COLORS) { screenOffColorUpdateEnabled() }
@@ -236,18 +241,33 @@ fun SettingsAdvancedScreen(
                     .padding(bottom = LocalPreviewBottomInset.current)
                     .padding(top = 16.dp)
             ) {
+                SwitchItem(
+                    title = "Karabure style",
+                    summary = "(Preview only) show a concept of Karabure\'s color style, it overrides custom secondary and tertiary colors.",
+                    icon = rememberVectorPainter(Icons.Rounded.Style),
+                    checked = karabureStyle,
+                    position = WidgetPosition.Top,
+                    onCheckedChange = { isChecked ->
+                        karabureStyle = isChecked
+                        PreviewController.beginPreview()
+                        resetCustomStyleIfNotNull()
+                        setKarabureStyleEnabled(isChecked)
+                        updateColors()
+                    }
+                )
                 ColorPickerItem(
                     title = stringResource(R.string.custom_secondary_color_desc),
                     summary = stringResource(R.string.custom_secondary_color_summary),
                     previewColor = Color(secondaryColor),
                     icon = rememberVectorPainter(Icons.Rounded.FormatPaint),
-                    enabled = customColor && rootMode,
+                    enabled = customColor && rootMode && !karabureStyle,
                     disabledReason = when {
                         !rootMode -> stringResource(R.string.root_required)
                         !customColor -> stringResource(R.string.custom_primary_color_required)
+                        karabureStyle -> "Overridden by Karabure Style"
                         else -> null
                     },
-                    position = WidgetPosition.Top,
+                    position = WidgetPosition.Middle,
                     onClick = {
                         colorPickerTarget = TARGET_SECONDARY
                     }
@@ -257,10 +277,11 @@ fun SettingsAdvancedScreen(
                     summary = stringResource(R.string.custom_tertiary_color_desc),
                     previewColor = Color(tertiaryColor),
                     icon = rememberVectorPainter(Icons.Rounded.FormatPaint),
-                    enabled = customColor && rootMode,
+                    enabled = customColor && rootMode && !karabureStyle,
                     disabledReason = when {
                         !rootMode -> stringResource(R.string.root_required)
                         !customColor -> stringResource(R.string.custom_primary_color_required)
+                        karabureStyle -> "Overridden by Karabure Style"
                         else -> null
                     },
                     position = WidgetPosition.Bottom,

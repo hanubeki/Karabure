@@ -14,6 +14,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getSecondaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getTertiaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.karabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.secondaryColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.tertiaryColorEnabled
 import com.drdisagree.colorblendr.data.enums.MONET
@@ -23,6 +24,7 @@ import com.drdisagree.colorblendr.utils.cam.CamUtils
 import com.drdisagree.colorblendr.utils.colors.ColorSchemeUtil.generateColorPalette
 import com.google.android.material.color.DynamicColors
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -84,22 +86,101 @@ object ColorUtil {
             isDark
         )
 
-        // Set custom secondary accent color
-        if (secondaryColorEnabled()) {
-            palette[1] = generateColorPalette(
-                style,
-                getSecondaryColorValue(),
-                isDark
-            )[0]
-        }
+        if (karabureStyleEnabled()) {
+            val seedCam = Cam.fromInt(seedColor)
+            val wallpaperColorList = getWallpaperColorList()
+            var foundSecondaryColor: Int? = null
+            var foundTertiaryColor: Int? = null
 
-        // Set custom tertiary accent color
-        if (tertiaryColorEnabled()) {
-            palette[2] = generateColorPalette(
-                style,
-                getTertiaryColorValue(),
-                isDark
-            )[0]
+            for (curColor in wallpaperColorList) {
+                val curCam = Cam.fromInt(curColor)
+                val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
+
+                if (foundTertiaryColor == null && hueDiff >= 45f && curCam.chroma >= 18f) {
+                    foundTertiaryColor = curColor
+
+                    foundSecondaryColor?.let {
+                        val secondaryCam = Cam.fromInt(it)
+                        val bothHueDiff = abs(secondaryCam.hue - curCam.hue).coerceAtMost(360f - abs(secondaryCam.hue - curCam.hue))
+
+                        if (bothHueDiff >= 45f) {
+                            break
+                        }
+                    }
+                } else if (hueDiff >= 30f && curCam.chroma >= 18f) {
+                    foundSecondaryColor = curColor
+
+                    foundTertiaryColor?.let {
+                        val tertiaryCam = Cam.fromInt(it)
+                        val tertiaryHueDiff = abs(tertiaryCam.hue - seedCam.hue).coerceAtMost(360f - abs(tertiaryCam.hue - seedCam.hue))
+                        val bothHueDiff = abs(curCam.hue - tertiaryCam.hue).coerceAtMost(360f - abs(curCam.hue - tertiaryCam.hue))
+
+                        if (bothHueDiff >= 45f) {
+                            if (hueDiff > tertiaryHueDiff) {
+                                foundSecondaryColor = it
+                                foundTertiaryColor = curColor
+                            }
+
+                            break
+                        }
+                    }
+                }
+            }
+
+            if (foundTertiaryColor != null && foundSecondaryColor != null) {
+                val secondaryCam = Cam.fromInt(foundSecondaryColor)
+                val tertiaryCam = Cam.fromInt(foundTertiaryColor)
+                val bothHueDiff = abs(secondaryCam.hue - tertiaryCam.hue).coerceAtMost(360f - abs(secondaryCam.hue - tertiaryCam.hue))
+
+                if (bothHueDiff < 45f) {
+                    foundSecondaryColor = null
+                }
+            } else if (foundTertiaryColor == null && foundSecondaryColor != null) {
+                val secondaryCam = Cam.fromInt(foundSecondaryColor)
+                val secondaryHueDiff = abs(secondaryCam.hue - seedCam.hue).coerceAtMost(360f - abs(secondaryCam.hue - seedCam.hue))
+
+                if (secondaryHueDiff >= 45f) {
+                    foundTertiaryColor = foundSecondaryColor
+                }
+
+                foundSecondaryColor = null
+            }
+
+            // Set custom secondary accent color
+            foundSecondaryColor?.let {
+                palette[1] = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )[0]
+            }
+
+            // Set custom tertiary accent color
+            foundTertiaryColor?.let {
+                palette[2] = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )[0]
+            }
+        } else {
+            // Set custom secondary accent color
+            if (secondaryColorEnabled()) {
+                palette[1] = generateColorPalette(
+                    style,
+                    getSecondaryColorValue(),
+                    isDark
+                )[0]
+            }
+
+            // Set custom tertiary accent color
+            if (tertiaryColorEnabled()) {
+                palette[2] = generateColorPalette(
+                    style,
+                    getTertiaryColorValue(),
+                    isDark
+                )[0]
+            }
         }
 
         // Modify colors
