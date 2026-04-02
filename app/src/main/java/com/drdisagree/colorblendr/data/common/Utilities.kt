@@ -9,6 +9,7 @@ import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_FOR_AP
 import com.drdisagree.colorblendr.data.common.Constant.FIRST_RUN
 import com.drdisagree.colorblendr.data.common.Constant.FORCE_PITCH_BLACK_SETTINGS
 import com.drdisagree.colorblendr.data.common.Constant.GSON
+import com.drdisagree.colorblendr.data.common.Constant.KARABURE_STYLE
 import com.drdisagree.colorblendr.data.common.Constant.MANUAL_OVERRIDE_COLORS
 import com.drdisagree.colorblendr.data.common.Constant.MODE_SPECIFIC_THEMES
 import com.drdisagree.colorblendr.data.common.Constant.MONET_ACCENT_SATURATION
@@ -254,6 +255,14 @@ object Utilities {
 
     fun setSeedColorValue(color: Int) {
         putInt(MONET_SEED_COLOR, color)
+    }
+
+    fun isKarabureStyleEnabled(): Boolean {
+        return getBoolean(KARABURE_STYLE, false)
+    }
+
+    fun setKarabureStyleEnabled(value: Boolean) {
+        putBoolean(KARABURE_STYLE, value)
     }
 
     fun secondaryColorEnabled(): Boolean {

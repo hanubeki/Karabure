@@ -16,6 +16,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getColorSpecVersion2025E
 import com.drdisagree.colorblendr.data.common.Utilities.getSecondaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getSelectedFabricatedApps
 import com.drdisagree.colorblendr.data.common.Utilities.getTertiaryColorValue
+import com.drdisagree.colorblendr.data.common.Utilities.isKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.modeSpecificThemesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.pitchBlackThemeEnabled
@@ -25,6 +26,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.semiTransparentLauncherI
 import com.drdisagree.colorblendr.data.common.Utilities.setColorSpecVersion2025Enabled
 import com.drdisagree.colorblendr.data.common.Utilities.setDarkerLauncherIconsEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setForcePitchBlackSettingsEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setModeSpecificThemesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setScreenOffColorUpdateEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setSecondaryColorValue
@@ -58,9 +60,18 @@ class SettingsAdvancedFragment : BaseFragment() {
 
         setToolbarTitle(requireContext(), R.string.advanced_settings, true, binding.header.toolbar)
 
+        // Karabure style
+        // binding.karabureStyle.isEnabled = isRootMode()
+        binding.karabureStyle.isSwitchChecked = isKarabureStyleEnabled()
+        binding.karabureStyle.setSwitchChangeListener { _: CompoundButton?, isChecked: Boolean ->
+            resetCustomStyleIfNotNull()
+            setKarabureStyleEnabled(isChecked)
+            updateColors()
+        }
+
         // Secondary color
         var monetSecondaryColor = getSecondaryColorValue()
-        binding.secondaryColorPicker.isEnabled = customColorEnabled() && isRootMode()
+        binding.secondaryColorPicker.isEnabled = customColorEnabled() && isRootMode() && !isKarabureStyleEnabled()
         binding.secondaryColorPicker.previewColor = monetSecondaryColor
         binding.secondaryColorPicker.setOnClickListener {
             ColorPickerDialog()
@@ -84,7 +95,7 @@ class SettingsAdvancedFragment : BaseFragment() {
 
         // Tertiary color
         var monetTertiaryColor = getTertiaryColorValue()
-        binding.tertiaryColorPicker.isEnabled = customColorEnabled() && isRootMode()
+        binding.tertiaryColorPicker.isEnabled = customColorEnabled() && isRootMode() && !isKarabureStyleEnabled()
         binding.tertiaryColorPicker.previewColor = monetTertiaryColor
         binding.tertiaryColorPicker.setOnClickListener {
             ColorPickerDialog()

@@ -12,6 +12,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getSecondaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getTertiaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.isKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.secondaryColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.tertiaryColorEnabled
 import com.drdisagree.colorblendr.data.enums.MONET
@@ -21,6 +22,7 @@ import com.drdisagree.colorblendr.utils.cam.CamUtils
 import com.drdisagree.colorblendr.utils.colors.ColorSchemeUtil.generateColorPalette
 import com.google.android.material.color.DynamicColors
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -82,22 +84,67 @@ object ColorUtil {
             isDark
         )
 
-        // Set custom secondary accent color
-        if (secondaryColorEnabled()) {
-            palette[1] = generateColorPalette(
-                style,
-                getSecondaryColorValue(),
-                isDark
-            )[0]
-        }
+        if (isKarabureStyleEnabled()) {
+            val seedCam = Cam.fromInt(seedColor)
+            val wallpaperColorList = getWallpaperColorList()
+            var foundColor: Int? = null
 
-        // Set custom tertiary accent color
-        if (tertiaryColorEnabled()) {
-            palette[2] = generateColorPalette(
-                style,
-                getTertiaryColorValue(),
-                isDark
-            )[0]
+            for (curColor in wallpaperColorList) {
+                val curCam = Cam.fromInt(curColor)
+                val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
+
+                if (hueDiff >= 45f && curCam.chroma >= 18f) {
+                    foundColor = curColor
+                    break
+                }
+            }
+
+            // Set custom tertiary accent color
+            foundColor?.let { tertiaryColor ->
+                palette[2] = generateColorPalette(
+                    style,
+                    tertiaryColor,
+                    isDark
+                )[0]
+
+                var foundSecondaryColor: Int? = null
+
+                for (curColor in wallpaperColorList) {
+                    val curCam = Cam.fromInt(curColor)
+                    val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
+
+                    if (hueDiff in 5f..<30f) {
+                        foundSecondaryColor = curColor
+                        break
+                    }
+                }
+
+                foundSecondaryColor?.let { secondaryColor ->
+                    palette[1] = generateColorPalette(
+                        style,
+                        secondaryColor,
+                        isDark
+                    )[0]
+                }
+           }
+        } else {
+            // Set custom secondary accent color
+            if (secondaryColorEnabled()) {
+                palette[1] = generateColorPalette(
+                    style,
+                    getSecondaryColorValue(),
+                    isDark
+                )[0]
+            }
+
+            // Set custom tertiary accent color
+            if (tertiaryColorEnabled()) {
+                palette[2] = generateColorPalette(
+                    style,
+                    getTertiaryColorValue(),
+                    isDark
+                )[0]
+            }
         }
 
         // Modify colors
