@@ -11,6 +11,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.setAccurateShadesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setColorSpecVersion
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setModeSpecificThemesEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setPitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setSecondaryColorValue
@@ -43,6 +44,8 @@ object CommunityThemeApplier {
         setCurrentMonetStyle(theme.style)
         setCustomColorEnabled(true)
         setSeedColorValue(theme.seedColor)
+        // Community Themes don't support Karabure Style
+        setKarabureStyleEnabled(false)
         // WHITE = "not set" sentinel for secondary/tertiary.
         setSecondaryColorValue(theme.secondaryColor ?: AndroidColor.WHITE)
         setTertiaryColorValue(theme.tertiaryColor ?: AndroidColor.WHITE)
