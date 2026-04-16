@@ -19,10 +19,14 @@ import com.drdisagree.colorblendr.data.common.Utilities.clearAllOverriddenColors
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.isAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuMode
+import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
+import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.updateColorAppliedTimestamp
 import com.drdisagree.colorblendr.databinding.FragmentColorsBinding
@@ -30,6 +34,7 @@ import com.drdisagree.colorblendr.ui.viewmodels.ColorsViewModel
 import com.drdisagree.colorblendr.ui.viewmodels.SharedViewModel
 import com.drdisagree.colorblendr.ui.views.WallColorPreview
 import com.drdisagree.colorblendr.utils.app.MiscUtil.setToolbarTitle
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlinx.coroutines.CoroutineScope
@@ -106,6 +111,12 @@ class ColorsFragment : BaseFragment() {
                     if (monetSeedColor[0] != color) {
                         monetSeedColor[0] = color
                         binding.seedColorPicker.previewColor = color
+                        if (isAutoStyleEnabled()) {
+                            val monet = chooseMonetStyle(color)
+                            setCurrentMonetStyle(monet)
+                            resetCustomStyle()
+                            setOriginalStyleName(monet.toString())
+                        }
                         setSeedColorValue(monetSeedColor[0])
 
                         CoroutineScope(Dispatchers.Main).launch {
@@ -224,6 +235,13 @@ class ColorsFragment : BaseFragment() {
                 setOnClickListener {
                     if (!isSelected) {
                         resetCustomStyleIfNotNull()
+                    }
+
+                    if (isAutoStyleEnabled()) {
+                        val monet = chooseMonetStyle(tag as Int)
+                        setCurrentMonetStyle(monet)
+                        resetCustomStyle()
+                        setOriginalStyleName(monet.toString())
                     }
 
                     setSeedColorValue(tag as Int)
