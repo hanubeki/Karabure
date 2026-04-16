@@ -33,6 +33,7 @@ object Constant {
     const val DOLBY_ATMOS = "org.lineageos.dspvolume.xiaomi"
     const val THEME_PICKER = "com.android.wallpaper"
     const val THEME_PICKER_GOOGLE = "com.google.android.apps.wallpaper"
+    const val MUZEI = "net.nurik.roman.muzei"
 
     // Intent actions
     const val ACTION_REFRESH = "${OWN_PACKAGE_NAME}.intent.action.REFRESH"
