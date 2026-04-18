@@ -98,48 +98,58 @@ object ColorUtil {
         if (isKarabureStyleEnabled()) {
             val seedCam = Cam.fromInt(seedColor)
             val wallpaperColorList = getWallpaperColorList()
-            var foundColor: Int? = null
+            var foundSecondaryColor: Int? = null
+            var foundTertiaryColor: Int? = null
 
             for (curColor in wallpaperColorList) {
                 val curCam = Cam.fromInt(curColor)
                 val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
 
-                if (hueDiff >= 45f && curCam.chroma >= 18f) {
-                    foundColor = curColor
+                if (hueDiff >= 30f && curCam.chroma >= 18f) {
+                    foundSecondaryColor = curColor
                     break
                 }
             }
 
-            // Set custom tertiary accent color
-            foundColor?.let { tertiaryColor ->
-                val targetTertiaryPalette = generateColorPalette(
-                    style,
-                    tertiaryColor,
-                    isDark
-                )
-                palette[2] = TonalPalette.fromHueAndChroma(targetTertiaryPalette[0].hue, targetTertiaryPalette[2].chroma)
-
-                var foundSecondaryColor: Int? = null
-
+            foundSecondaryColor?.let {
                 for (curColor in wallpaperColorList) {
                     val curCam = Cam.fromInt(curColor)
                     val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
 
-                    if (hueDiff in 5f..<30f) {
-                        foundSecondaryColor = curColor
+                    val secondaryCam = Cam.fromInt(it)
+                    val secondaryHueDiff = abs(curCam.hue - secondaryCam.hue).coerceAtMost(360f - abs(curCam.hue - secondaryCam.hue))
+
+                    if (hueDiff >= 45f && secondaryHueDiff >= 45f && curCam.chroma >= 18f) {
+                        foundTertiaryColor = curColor
                         break
                     }
                 }
+            }
 
-                foundSecondaryColor?.let { secondaryColor ->
-                    val targetSecondaryPalette = generateColorPalette(
-                        style,
-                        secondaryColor,
-                        isDark
-                    )
-                    palette[1] = TonalPalette.fromHueAndChroma(targetSecondaryPalette[0].hue, targetSecondaryPalette[1].chroma)
-                }
-           }
+            if (foundTertiaryColor == null) {
+                foundTertiaryColor = foundSecondaryColor
+                foundSecondaryColor = null
+            }
+
+            // Set custom secondary accent color
+            foundSecondaryColor?.let {
+                val targetSecondaryPalette = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )
+                palette[1] = TonalPalette.fromHueAndChroma(targetSecondaryPalette[0].hue, targetSecondaryPalette[1].chroma)
+            }
+
+            // Set custom tertiary accent color
+            foundTertiaryColor?.let {
+                val targetTertiaryPalette = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )
+                palette[2] = TonalPalette.fromHueAndChroma(targetTertiaryPalette[0].hue, targetTertiaryPalette[2].chroma)
+            }
         } else {
             // Set custom secondary accent color
             if (secondaryColorEnabled()) {
