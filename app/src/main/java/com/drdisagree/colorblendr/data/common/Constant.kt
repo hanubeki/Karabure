@@ -64,6 +64,7 @@ object Constant {
     const val MONET_PITCH_BLACK_THEME = "monetPitchBlackTheme"
     const val MONET_SEED_COLOR_ENABLED = "monetSeedColorEnabled"
     const val MONET_SEED_COLOR = "monetSeedColor"
+    const val KARABURE_STYLE = "karabureStyle"
     const val MONET_SECONDARY_COLOR = "monetSecondaryColor"
     const val MONET_TERTIARY_COLOR = "monetTertiaryColor"
     const val MANUAL_OVERRIDE_COLORS = "manualOverrideColors"

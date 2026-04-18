@@ -24,14 +24,12 @@ import com.drdisagree.materialcolorutilities.scheme.SchemeVibrant
 
 object ColorSchemeUtil {
 
-    private val tones: IntArray = intArrayOf(100, 99, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0)
-
     fun generateColorPalette(
         style: MONET,
         @ColorInt color: Int,
         isDark: Boolean = SystemUtil.isDarkMode,
         contrast: Int = 0
-    ): ArrayList<ArrayList<Int>> {
+    ): ArrayList<TonalPalette> {
         val palette = ArrayList<ArrayList<Int>>()
         val specVersion: ColorSpec.SpecVersion = if (getColorSpecVersion2025Enabled()) {
             ColorSpec.SpecVersion.SPEC_2025
@@ -49,7 +47,7 @@ object ColorSchemeUtil {
             platform
         )
 
-        val tonalPalettes = arrayOf(
+        val tonalPalettes = arrayListOf(
             dynamicScheme.primaryPalette,
             dynamicScheme.secondaryPalette,
             dynamicScheme.tertiaryPalette,
@@ -58,11 +56,7 @@ object ColorSchemeUtil {
             dynamicScheme.errorPalette
         )
 
-        for (tonalPalette in tonalPalettes) {
-            palette.add(createToneList(tonalPalette))
-        }
-
-        return palette
+        return tonalPalettes
     }
 
     private fun getDynamicScheme(
@@ -146,14 +140,6 @@ object ColorSchemeUtil {
                 platform
             )
         }
-    }
-
-    private fun createToneList(palette: TonalPalette): ArrayList<Int> {
-        val toneList = ArrayList<Int>()
-        for (tone in tones) {
-            toneList.add(palette.tone(tone))
-        }
-        return toneList
     }
 
     fun Int.getStyleNameForRootless(): String {

@@ -12,6 +12,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getSecondaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getTertiaryColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.isKarabureStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.secondaryColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.tertiaryColorEnabled
 import com.drdisagree.colorblendr.data.enums.MONET
@@ -19,19 +20,31 @@ import com.drdisagree.colorblendr.utils.app.SystemUtil
 import com.drdisagree.colorblendr.utils.cam.Cam
 import com.drdisagree.colorblendr.utils.cam.CamUtils
 import com.drdisagree.colorblendr.utils.colors.ColorSchemeUtil.generateColorPalette
+import com.drdisagree.materialcolorutilities.palettes.TonalPalette
 import com.google.android.material.color.DynamicColors
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object ColorUtil {
 
+    private val tones: IntArray = intArrayOf(100, 99, 95, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0)
+
     @ColorInt
     fun getColorFromAttribute(context: Context, attr: Int): Int {
         val typedValue = TypedValue()
         context.theme.resolveAttribute(attr, typedValue, true)
         return typedValue.data
+    }
+
+    private fun createToneList(palette: TonalPalette): ArrayList<Int> {
+        val toneList = ArrayList<Int>()
+        for (tone in tones) {
+            toneList.add(palette.tone(tone))
+        }
+        return toneList
     }
 
     fun generateModifiedColors(
@@ -76,34 +89,101 @@ object ColorUtil {
         isDark: Boolean,
         overrideColors: Boolean
     ): ArrayList<ArrayList<Int>> {
-        val palette: ArrayList<ArrayList<Int>> = generateColorPalette(
+        val palette: ArrayList<TonalPalette> = generateColorPalette(
             style,
             seedColor,
             isDark
         )
 
-        // Set custom secondary accent color
-        if (secondaryColorEnabled()) {
-            palette[1] = generateColorPalette(
-                style,
-                getSecondaryColorValue(),
-                isDark
-            )[0]
+        if (isKarabureStyleEnabled()) {
+            val seedCam = Cam.fromInt(seedColor)
+            val wallpaperColorList = getWallpaperColorList()
+            var foundSecondaryColor: Int? = null
+            var foundTertiaryColor: Int? = null
+
+            for (curColor in wallpaperColorList) {
+                val curCam = Cam.fromInt(curColor)
+                val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
+
+                if (hueDiff >= 30f && curCam.chroma >= 18f) {
+                    foundSecondaryColor = curColor
+                    break
+                }
+            }
+
+            foundSecondaryColor?.let {
+                for (curColor in wallpaperColorList) {
+                    val curCam = Cam.fromInt(curColor)
+                    val hueDiff = abs(curCam.hue - seedCam.hue).coerceAtMost(360f - abs(curCam.hue - seedCam.hue))
+
+                    val secondaryCam = Cam.fromInt(it)
+                    val secondaryHueDiff = abs(curCam.hue - secondaryCam.hue).coerceAtMost(360f - abs(curCam.hue - secondaryCam.hue))
+
+                    if (hueDiff >= 45f && secondaryHueDiff >= 45f && curCam.chroma >= 18f) {
+                        foundTertiaryColor = curColor
+                        break
+                    }
+                }
+            }
+
+            if (foundTertiaryColor == null) {
+                foundTertiaryColor = foundSecondaryColor
+                foundSecondaryColor = null
+            }
+
+            // Set custom secondary accent color
+            foundSecondaryColor?.let {
+                val targetSecondaryPalette = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )
+                palette[1] = TonalPalette.fromHueAndChroma(targetSecondaryPalette[0].hue, targetSecondaryPalette[1].chroma)
+            }
+
+            // Set custom tertiary accent color
+            foundTertiaryColor?.let {
+                val targetTertiaryPalette = generateColorPalette(
+                    style,
+                    it,
+                    isDark
+                )
+                palette[2] = TonalPalette.fromHueAndChroma(targetTertiaryPalette[0].hue, targetTertiaryPalette[2].chroma)
+            }
+        } else {
+            // Set custom secondary accent color
+            if (secondaryColorEnabled()) {
+                val targetSecondaryPalette = generateColorPalette(
+                    style,
+                    getSecondaryColorValue(),
+                    isDark
+                )
+                // palette[1] = TonalPalette.fromHueAndChroma(getHue(getSecondaryColorValue()).toDouble(), palette[1].chroma)
+                palette[1] = TonalPalette.fromHueAndChroma(targetSecondaryPalette[0].hue, targetSecondaryPalette[1].chroma)
+            }
+
+            // Set custom tertiary accent color
+            if (tertiaryColorEnabled()) {
+                val targetTertiaryPalette = generateColorPalette(
+                    style,
+                    getTertiaryColorValue(),
+                    isDark
+                )
+                // palette[2] = TonalPalette.fromHueAndChroma(getHue(getTertiaryColorValue()).toDouble(), palette[2].chroma)
+                palette[2] = TonalPalette.fromHueAndChroma(targetTertiaryPalette[0].hue, targetTertiaryPalette[2].chroma)
+            }
         }
 
-        // Set custom tertiary accent color
-        if (tertiaryColorEnabled()) {
-            palette[2] = generateColorPalette(
-                style,
-                getTertiaryColorValue(),
-                isDark
-            )[0]
+        val generatedPalette: ArrayList<ArrayList<Int>> = ArrayList(ArrayList())
+
+        for (curPalette in palette) {
+            generatedPalette.add(createToneList(curPalette))
         }
 
         // Modify colors
-        for (i in palette.indices) {
+        for (i in generatedPalette.indices) {
             val modifiedShades = ColorModifiers.modifyColors(
-                ArrayList(palette[i].subList(1, palette[i].size)),
+                ArrayList(generatedPalette[i].subList(1, generatedPalette[i].size)),
                 AtomicInteger(i),
                 style,
                 accentSaturation,
@@ -114,12 +194,12 @@ object ColorUtil {
                 modifyPitchBlack,
                 overrideColors
             )
-            for (j in 1 until palette[i].size) {
-                palette[i][j] = modifiedShades[j - 1]
+            for (j in 1 until generatedPalette[i].size) {
+                generatedPalette[i][j] = modifiedShades[j - 1]
             }
         }
 
-        return palette
+        return generatedPalette
     }
 
     @ColorInt
