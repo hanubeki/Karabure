@@ -66,9 +66,13 @@ import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
+import com.drdisagree.colorblendr.data.common.Utilities.autoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
+import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
+import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setSeedColorValue
 import com.drdisagree.colorblendr.data.domain.AppEvents
 import com.drdisagree.colorblendr.data.domain.PreviewController
@@ -85,6 +89,7 @@ import com.drdisagree.colorblendr.ui.compose.views.WallColorPreviewCanvas
 import com.drdisagree.colorblendr.ui.compose.views.WallColorPreviewColors
 import com.drdisagree.colorblendr.ui.viewmodels.ColorsViewModel
 import com.drdisagree.colorblendr.utils.colors.ColorUtil.calculateTextColor
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import kotlinx.coroutines.launch
 import me.jfenn.colorpickerdialog.compose.dialogs.ColorPickerDialog
 import me.jfenn.colorpickerdialog.compose.dialogs.ColorPickerType
@@ -168,6 +173,13 @@ fun ColorsScreen(
         colorsViewModel.onSeedColorSelected(color, !isWallpaperColor)
         seedColor = color
         customColor = !isWallpaperColor
+
+        if (autoStyleEnabled()) {
+            val monet = chooseMonetStyle(color)
+            setCurrentMonetStyle(monet)
+            resetCustomStyle()
+            setOriginalStyleName(monet.toString())
+        }
 
         scope.launch {
             PreviewController.updatePreview()

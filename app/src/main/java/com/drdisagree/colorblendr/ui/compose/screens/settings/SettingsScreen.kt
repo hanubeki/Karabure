@@ -3,6 +3,7 @@ package com.drdisagree.colorblendr.ui.compose.screens.settings
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.rounded.Brush
 import androidx.compose.material.icons.rounded.FormatColorText
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.InvertColors
+import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.TableChart
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -44,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.drdisagree.colorblendr.R
+import com.drdisagree.colorblendr.data.common.Constant.AUTO_MONET_STYLE
 import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_NAME_SYSTEM
 import com.drdisagree.colorblendr.data.common.Constant.MANUAL_OVERRIDE_COLORS
 import com.drdisagree.colorblendr.data.common.Constant.MONET_ACCURATE_SHADES
@@ -53,7 +56,9 @@ import com.drdisagree.colorblendr.data.common.Constant.THEMING_ENABLED
 import com.drdisagree.colorblendr.data.common.Constant.TINT_TEXT_COLOR
 import com.drdisagree.colorblendr.data.common.Constant.WIRELESS_ADB_THEMING_ENABLED
 import com.drdisagree.colorblendr.data.common.Utilities.accurateShadesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.autoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.clearAllOverriddenColors
+import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.isColorOverriddenFor
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.isShizukuThemingEnabled
@@ -63,7 +68,10 @@ import com.drdisagree.colorblendr.data.common.Utilities.manualColorOverrideEnabl
 import com.drdisagree.colorblendr.data.common.Utilities.pitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyleIfNotNull
 import com.drdisagree.colorblendr.data.common.Utilities.setAccurateShadesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setManualColorOverrideEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
 import com.drdisagree.colorblendr.data.common.Utilities.setPitchBlackThemeEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setShizukuThemingEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setThemingEnabled
@@ -92,6 +100,7 @@ import com.drdisagree.colorblendr.ui.compose.utils.AdaptivePreviews
 import com.drdisagree.colorblendr.ui.compose.utils.rememberPrefState
 import com.drdisagree.colorblendr.utils.app.BackupRestore.backupDatabaseAndPrefs
 import com.drdisagree.colorblendr.utils.app.BackupRestore.restoreDatabaseAndPrefs
+import com.drdisagree.colorblendr.utils.colors.ColorUtil.chooseMonetStyle
 import com.drdisagree.colorblendr.utils.colors.ColorUtil.systemPaletteNames
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.applyFabricatedColors
 import com.drdisagree.colorblendr.utils.manager.OverlayManager.isOverlayEnabled
@@ -119,6 +128,7 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val rootMode = remember { isRootMode() }
+    val a13 = remember { Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU }
     var masterChecked by rememberPrefState(
         THEMING_ENABLED,
         SHIZUKU_THEMING_ENABLED,
@@ -129,6 +139,7 @@ fun SettingsScreen(
                 || isWirelessAdbThemingEnabled()
     }
     var accurateShades by rememberPrefState(MONET_ACCURATE_SHADES) { accurateShadesEnabled() }
+    var autoStyle by rememberPrefState(AUTO_MONET_STYLE) { autoStyleEnabled() }
     var pitchBlack by rememberPrefState(MONET_PITCH_BLACK_THEME) { pitchBlackThemeEnabled() }
     var tintTextColor by rememberPrefState(TINT_TEXT_COLOR) { tintedTextEnabled() }
     var overrideManually by rememberPrefState(MANUAL_OVERRIDE_COLORS) { manualColorOverrideEnabled() }
@@ -395,6 +406,27 @@ fun SettingsScreen(
                             resetCustomStyleIfNotNull()
                             setAccurateShadesEnabled(isChecked)
                             RefreshCoordinator.triggerRefresh()
+                            updateColors()
+                        }
+                    )
+                    SwitchItem(
+                        title = "Auto Style",
+                        summary = "Set styles according to chroma value, will choose between Tonal Spot, Vibrant and Neutral styles.",
+                        icon = rememberVectorPainter(Icons.Rounded.Style),
+                        checked = autoStyle,
+                        enabled = a13 || rootMode,
+                        disabledReason = if (!a13) stringResource(R.string.android_13_required) else null,
+                        position = WidgetPosition.Middle,
+                        onCheckedChange = { isChecked ->
+                            autoStyle = isChecked
+                            PreviewController.beginPreview()
+                            resetCustomStyleIfNotNull()
+                            setAutoStyleEnabled(isChecked)
+                            if (autoStyleEnabled()) {
+                                val monet = chooseMonetStyle(getSeedColorValue())
+                                setCurrentMonetStyle(monet)
+                                setOriginalStyleName(monet.toString())
+                            }
                             updateColors()
                         }
                     )

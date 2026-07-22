@@ -53,6 +53,7 @@ import com.drdisagree.colorblendr.data.common.Utilities.getCurrentCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.getCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.isRootMode
 import com.drdisagree.colorblendr.data.common.Utilities.resetCustomStyle
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentCustomStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setOriginalStyleName
@@ -177,6 +178,7 @@ fun StylesScreen(stylesViewModel: StylesViewModel) {
                                 selectedCustomStyle = null
                                 scope.launch {
                                     PreviewController.beginPreview()
+                                    setAutoStyleEnabled(false)
                                     setCurrentMonetStyle(style.monetStyle)
                                     resetCustomStyle()
                                     setOriginalStyleName(style.titleResId.getStyleNameForRootless())
@@ -186,6 +188,7 @@ fun StylesScreen(stylesViewModel: StylesViewModel) {
                                 selectedCustomStyle = style.customStyle.styleId
                                 scope.launch {
                                     PreviewController.beginPreview()
+                                    setAutoStyleEnabled(false)
                                     BackupRestore.restorePrefsMap(style.customStyle.prefsGson.toPrefs())
                                     setCurrentCustomStyle(style.customStyle.styleId)
                                     clearOriginalStyleName()
