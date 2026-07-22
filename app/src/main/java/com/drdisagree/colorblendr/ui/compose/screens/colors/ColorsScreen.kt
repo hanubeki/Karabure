@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.colorblendr.R
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getSeedColorValue
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
@@ -149,7 +150,8 @@ fun ColorsScreen(
     LaunchedEffect(Unit) {
         @Suppress("DEPRECATION")
         AppEvents.events.collect { action ->
-            if (action == Intent.ACTION_WALLPAPER_CHANGED) {
+            if (action == Intent.ACTION_WALLPAPER_CHANGED
+                || action == ACTION_REFRESH) {
                 colorsViewModel.loadWallpaperColors()
             }
         }
