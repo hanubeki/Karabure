@@ -4,10 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import com.drdisagree.colorblendr.data.common.Constant
+import com.drdisagree.colorblendr.data.common.Constant.ACTION_REFRESH
 import com.drdisagree.colorblendr.data.common.Constant.FABRICATED_OVERLAY_NAME_APPS
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getLastColorAppliedTimestamp
@@ -35,15 +34,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 class BroadcastListener : BroadcastReceiver() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var sleepRunnable: Runnable? = null
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private var isScreenOff = false
+    private val mutex = Mutex()
 
     @Suppress("deprecation")
     override fun onReceive(context: Context, intent: Intent) {
@@ -60,26 +60,51 @@ class BroadcastListener : BroadcastReceiver() {
                     handleBootCompleted(context)
                 }
 
-                Intent.ACTION_WALLPAPER_CHANGED,
+                Intent.ACTION_WALLPAPER_CHANGED -> {
+                    val fromForegroundApp = intent.getBooleanExtra("android.service.wallpaper.extra.FROM_FOREGROUND_APP", false)
+
+                    mutex.withLock {
+                        if (isScreenOff || !screenOffColorUpdateEnabled() || fromForegroundApp) {
+                            handleWallpaperChanged(context, true)
+                        } else {
+                            handleWallpaperChanged(context, applyNow = false)
+                        }
+                    }
+                }
+
                 Intent.ACTION_USER_FOREGROUND -> {
                     handleWallpaperChanged(context, true)
                 }
 
                 Intent.ACTION_SCREEN_OFF -> {
                     if (screenOffColorUpdateEnabled()) {
-                        sleepRunnable = Runnable {
-                            coroutineScope.launch {
-                                handleWallpaperChanged(context)
+                        mutex.withLock {
+                            if (requiresUpdate) {
+                                requiresUpdate = false
+                                validateRootAndUpdateColors(context) {
+                                    updateAllColors(true)
+                                }
                             }
+
+                            isScreenOff = true
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
                     }
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
-                    sleepRunnable?.let { runnable ->
-                        handler.removeCallbacks(runnable)
-                        sleepRunnable = null
+                    mutex.withLock {
+                        isScreenOff = false
+                    }
+                }
+
+                // TODO: better way to observe wallpaper colors changes
+                ACTION_REFRESH -> {
+                    mutex.withLock {
+                        if (isScreenOff || !screenOffColorUpdateEnabled()) {
+                            handleWallpaperChanged(context, true)
+                        } else {
+                            handleWallpaperChanged(context, applyNow = false)
+                        }
                     }
                 }
 
@@ -112,7 +137,8 @@ class BroadcastListener : BroadcastReceiver() {
             if (intent.action in listOf(
                     Intent.ACTION_PACKAGE_ADDED,
                     Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_WALLPAPER_CHANGED
+                    Intent.ACTION_WALLPAPER_CHANGED,
+                    ACTION_REFRESH
                 )
             ) {
                 AppEvents.emit(intent.action!!)
@@ -135,7 +161,7 @@ class BroadcastListener : BroadcastReceiver() {
         }
     }
 
-    private suspend fun handleWallpaperChanged(context: Context, force: Boolean = false) {
+    private suspend fun handleWallpaperChanged(context: Context, force: Boolean = false, applyNow: Boolean = true) {
         if (permissionsGranted(context)) {
             val wallpaperColors = withContext(Dispatchers.IO) {
                 getWallpaperColors(context)
@@ -155,7 +181,7 @@ class BroadcastListener : BroadcastReceiver() {
             }
         }
 
-        if (requiresUpdate || force) {
+        if ((requiresUpdate || force) && applyNow) {
             requiresUpdate = false
             validateRootAndUpdateColors(context) {
                 updateAllColors(true)
