@@ -38,6 +38,9 @@ object Constant {
     const val BLISS_LAUNCHER = "foundation.e.blisslauncher"
     const val MUZEI = "net.nurik.roman.muzei"
 
+    // Intent actions
+    const val ACTION_REFRESH = "${OWN_PACKAGE_NAME}.action.REFRESH"
+
     // Request codes
     const val SHIZUKU_PERMISSION_REQUEST_ID = 100
 
