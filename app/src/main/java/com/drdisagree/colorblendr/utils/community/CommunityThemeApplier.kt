@@ -8,6 +8,7 @@ import com.drdisagree.colorblendr.data.common.Constant.MONET_BACKGROUND_LIGHTNES
 import com.drdisagree.colorblendr.data.common.Constant.MONET_BACKGROUND_SATURATION_DARK
 import com.drdisagree.colorblendr.data.common.Constant.MONET_BACKGROUND_SATURATION_LIGHT
 import com.drdisagree.colorblendr.data.common.Utilities.setAccurateShadesEnabled
+import com.drdisagree.colorblendr.data.common.Utilities.setAutoStyleEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.setColorSpecVersion
 import com.drdisagree.colorblendr.data.common.Utilities.setCurrentMonetStyle
 import com.drdisagree.colorblendr.data.common.Utilities.setCustomColorEnabled
@@ -40,6 +41,7 @@ object CommunityThemeApplier {
         // Community themes replace any selected custom style.
         Prefs.clearPref(CUSTOM_MONET_STYLE)
 
+        setAutoStyleEnabled(false)
         setCurrentMonetStyle(theme.style)
         setCustomColorEnabled(true)
         setSeedColorValue(theme.seedColor)
