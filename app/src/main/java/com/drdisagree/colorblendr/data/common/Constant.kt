@@ -36,6 +36,7 @@ object Constant {
     const val THEME_PICKER = "com.android.wallpaper"
     const val THEME_PICKER_GOOGLE = "com.google.android.apps.wallpaper"
     const val BLISS_LAUNCHER = "foundation.e.blisslauncher"
+    const val MUZEI = "net.nurik.roman.muzei"
 
     // Intent actions
     const val ACTION_REFRESH = "${OWN_PACKAGE_NAME}.action.REFRESH"
