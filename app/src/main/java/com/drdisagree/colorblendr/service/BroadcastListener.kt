@@ -73,7 +73,10 @@ class BroadcastListener : BroadcastReceiver() {
 
                 Intent.ACTION_WALLPAPER_CHANGED,
                 Intent.ACTION_USER_FOREGROUND -> {
-                    handleWallpaperChanged(context, true)
+                    val background = intent.action == Intent.ACTION_WALLPAPER_CHANGED
+                        && !intent.getBooleanExtra("android.service.wallpaper.extra.FROM_FOREGROUND_APP", false)
+                        && screenOffColorUpdateEnabled()
+                    handleWallpaperChanged(context, force = true, live = background)
                 }
 
                 Intent.ACTION_SCREEN_OFF -> {
