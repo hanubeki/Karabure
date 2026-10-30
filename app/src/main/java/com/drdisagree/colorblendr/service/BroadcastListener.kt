@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import com.drdisagree.colorblendr.data.common.Constant
@@ -47,8 +45,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @Suppress("DEPRECATION")
 class BroadcastListener : BroadcastReceiver() {
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var sleepRunnable: Runnable? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var screenOffWakeLock: PowerManager.WakeLock? = null
 
@@ -82,20 +78,16 @@ class BroadcastListener : BroadcastReceiver() {
 
                 Intent.ACTION_SCREEN_OFF -> {
                     if (screenOffColorUpdateEnabled()) {
-                        sleepRunnable = Runnable {
-                            coroutineScope.launch {
-                                handleWallpaperChanged(context)
+                        if (requiresUpdate) {
+                            requiresUpdate = false
+                            validateRootAndUpdateColors {
+                                updateAllColors(true)
                             }
                         }
-                        handler.postDelayed(sleepRunnable!!, 15000) // 15 seconds
                     }
                 }
 
                 Intent.ACTION_SCREEN_ON -> {
-                    sleepRunnable?.let { runnable ->
-                        handler.removeCallbacks(runnable)
-                        sleepRunnable = null
-                    }
                     releaseScreenOffWakeLock()
                 }
 
