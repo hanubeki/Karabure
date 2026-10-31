@@ -14,6 +14,7 @@ import androidx.core.graphics.scale
 import androidx.core.graphics.withClip
 import com.drdisagree.colorblendr.ColorBlendr.Companion.appContext
 import com.drdisagree.colorblendr.data.common.Constant
+import com.drdisagree.colorblendr.data.common.Constant.MUZEI
 import com.drdisagree.colorblendr.data.common.Utilities.customColorEnabled
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorJson
 import com.drdisagree.colorblendr.data.common.Utilities.getWallpaperColorList
@@ -24,6 +25,7 @@ import com.drdisagree.colorblendr.utils.app.AppUtil
 import com.drdisagree.colorblendr.utils.colors.ColorUtil
 import com.drdisagree.materialcolorutilities.quantize.QuantizerCelebi
 import com.drdisagree.materialcolorutilities.score.Score
+import com.google.android.apps.muzei.api.MuzeiContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.min
@@ -59,8 +61,10 @@ object WallpaperColorUtil {
         val wallpaperManager = WallpaperManager.getInstance(context)
         val isLiveWallpaper = wallpaperManager.wallpaperInfo != null
 
-        if (isLiveWallpaper) {
-            mergedColors.addSystemWallpaperColors(wallpaperManager)
+        wallpaperManager.wallpaperInfo?.let { info ->
+            if (info.packageName != MUZEI) {
+                mergedColors.addSystemWallpaperColors(wallpaperManager)
+            }
         }
 
         if (AppUtil.permissionsGranted(context) && (!isLiveWallpaper || mergedColors.isEmpty())) {
@@ -213,7 +217,20 @@ object WallpaperColorUtil {
 
                 // Live wallpaper
                 wallpaperManager.wallpaperInfo?.let { info ->
-                    return info.loadThumbnail(appContext.packageManager).toBitmap()
+                    if (info.packageName == MUZEI) {
+                        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        BitmapFactory.decodeStream(context.contentResolver.openInputStream(MuzeiContract.Artwork.CONTENT_URI), null, bounds)
+
+                        val smallestSide = min(bounds.outWidth, bounds.outHeight)
+                        var sampleSize = 1
+                        while (smallestSide / (sampleSize * 2) >= SMALL_SIDE) sampleSize *= 2
+
+                        val options = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+                        BitmapFactory.decodeStream(context.contentResolver.openInputStream(MuzeiContract.Artwork.CONTENT_URI), null, options)
+                            ?.let { return createMiniBitmap(it) }
+                    } else {
+                        return info.loadThumbnail(appContext.packageManager).toBitmap()
+                    }
                 }
 
                 // Static wallpaper
